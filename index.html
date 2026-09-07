@@ -3890,7 +3890,7 @@ function renderLoginPage() {
                 </button>
             </div>
 
-            <div class="login-card">
+            <div class="login-card" >
                 <div class="login-logo">
                     <img src="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png" alt="The Best Academy">
                 </div>
@@ -3914,26 +3914,51 @@ function renderLoginPage() {
                     </button>
                 </form>
 
-                <div class="login-divider"><span>أو</span></div>
-
-                <div class="login-footer">
-                    <div class="footer-divider"></div>
-                    <div class="footer-brand">
-                        <i class="fas fa-laptop-code"></i>
-                        <span>The Best Academy</span>
-                    </div>
-                    <div style="font-size: 11px; color: rgba(255,255,255,0.3); margin-top:5px;">
-                        <i class="fas fa-phone-alt"></i> 01144100018
-                    </div>
-                </div>
-            </div>
+               <div class="login-footer" style="
+    background: transparent !important;
+    padding: 15px 0 0 0;
+    margin-top: 10px;
+    border-top: 1px solid rgba(232,185,49,0.08);
+">
+    <div class="footer-divider" style="
+        width: 50px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #e8b931, transparent);
+        margin: 0 auto 12px;
+    "></div>
+    <div class="footer-brand" style="
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    ">
+        <i class="fas fa-laptop-code" style="color: #e8b931; font-size: 14px;"></i>
+        <span style="
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.4);
+        ">The Best Academy</span>
+    </div>
+    <div style="
+        font-size: 11px;
+        color: rgba(255,255,255,0.25);
+        margin-top: 5px;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    ">
+        <span><i class="fas fa-phone-alt" style="color: #e8b931;"></i> 01026463211</span>
+        <span><i class="fas fa-phone-alt" style="color: #e8b931;"></i> 01152569015</span>
+    </div>
+</div>
         </div>
     `;
 
-    // Create particles for login
+    
     createParticlesBg('#loginParticles');
 
-    // Toggle password
+   
     document.getElementById('togglePassword').addEventListener('click', function() {
         const input = document.getElementById('loginPassword');
         if (input.type === 'password') {
@@ -6209,9 +6234,36 @@ async function markExamAttendance(examId) {
                     </div>
                 </td>
                 <td style="padding:12px; border-bottom:1px solid rgba(255,255,255,0.03);"><strong style="color:#e8b931;">${student.points || 0}</strong></td>
-                <td style="padding:12px; border-bottom:1px solid rgba(255,255,255,0.03);">
-                    <button class="btn btn-sm btn-danger" onclick="deleteStudent(${student.id})" style="background:#e74c3c; color:white; padding:4px 12px; border:none; border-radius:20px; cursor:pointer; font-family:'Cairo'; font-weight:600;"><i class="fas fa-trash"></i></button>
-                </td>
+              <td style="padding:12px; border-bottom:1px solid rgba(255,255,255,0.03);">
+    <div style="display:flex; gap:5px; flex-wrap:wrap;">
+        <!-- زر تعديل -->
+        <button onclick="showEditStudentModal(${student.id})" 
+                style="background:#3498db; color:white; padding:4px 10px; border:none; border-radius:20px; cursor:pointer; font-family:'Cairo'; font-weight:600; font-size:12px; transition:0.3s;"
+                onmouseover="this.style.transform='scale(1.05)'" 
+                onmouseout="this.style.transform='scale(1)'"
+                title="تعديل بيانات الطالب">
+            <i class="fas fa-edit"></i>
+        </button>
+        
+        <!-- زر إرسال رسالة واتساب -->
+        <button onclick="sendWhatsApp(${student.id})" 
+                style="background:#128C7E; color:white; padding:4px 10px; border:none; border-radius:20px; cursor:pointer; font-family:'Cairo'; font-weight:600; font-size:12px; transition:0.3s;"
+                onmouseover="this.style.transform='scale(1.05)'" 
+                onmouseout="this.style.transform='scale(1)'"
+                title="إرسال رسالة ترحيب باليوزر والباسورد">
+            <i class="fab fa-whatsapp"></i>
+        </button>
+        
+        <!-- زر حذف -->
+        <button onclick="deleteStudent(${student.id})" 
+                style="background:#e74c3c; color:white; padding:4px 10px; border:none; border-radius:20px; cursor:pointer; font-family:'Cairo'; font-weight:600; font-size:12px; transition:0.3s;"
+                onmouseover="this.style.transform='scale(1.05)'" 
+                onmouseout="this.style.transform='scale(1)'"
+                title="حذف الطالب">
+            <i class="fas fa-trash"></i>
+        </button>
+    </div>
+</td>
             </tr>
         `;
     });
@@ -8287,6 +8339,218 @@ function renderStudentUpcomingMeetings() {
     }
 }
 
+// ==================== EDIT STUDENT ====================
+function showEditStudentModal(studentId) {
+    const student = appData.students.find(s => s.id === studentId);
+    if (!student) {
+        showToast('الطالب غير موجود', 'error');
+        return;
+    }
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.cssText = `
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7);
+        backdrop-filter: blur(8px);
+        z-index: 3000;
+        justify-content: center;
+        align-items: center;
+    `;
+
+    modal.innerHTML = `
+        <div style="background: #0a1628; border-radius: 30px; padding: 30px; max-width: 500px; width: 95%; border: 1px solid rgba(232,185,49,0.15); max-height: 85vh; overflow-y: auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom: 2px solid rgba(232,185,49,0.1); padding-bottom:12px;">
+                <h3 style="color:#e8b931; margin:0;">
+                    <i class="fas fa-user-edit"></i> تعديل بيانات الطالب
+                </h3>
+                <span onclick="this.closest('.modal').remove()" style="cursor:pointer; font-size:24px; color:rgba(255,255,255,0.3);">&times;</span>
+            </div>
+
+            <form id="editStudentForm">
+                <div class="input-group" style="margin-bottom:15px;">
+                    <label style="color:rgba(255,255,255,0.7); display:block; margin-bottom:5px;">الاسم الكامل</label>
+                    <input type="text" id="editName" value="${escapeHtml(student.name)}" required style="width:100%; padding:12px; border-radius:12px; border:2px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.05); color:white;">
+                </div>
+                <div class="input-group" style="margin-bottom:15px;">
+                    <label style="color:rgba(255,255,255,0.7); display:block; margin-bottom:5px;">رقم الهاتف</label>
+                    <input type="tel" id="editPhone" value="${student.phone || ''}" style="width:100%; padding:12px; border-radius:12px; border:2px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.05); color:white;">
+                </div>
+                <div class="input-group" style="margin-bottom:15px;">
+                    <label style="color:rgba(255,255,255,0.7); display:block; margin-bottom:5px;">الفصل</label>
+                    <select id="editClass" required style="width:100%; padding:12px; border-radius:12px; border:2px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.05); color:white;">
+                        <option value="">-- اختر الفصل --</option>
+                        ${appData.classes.map(c => `
+                            <option value="${c.id}" ${c.id === student.classId ? 'selected' : ''}>${c.name}</option>
+                        `).join('')}
+                    </select>
+                </div>
+                <div class="input-group" style="margin-bottom:15px;">
+                    <label style="color:rgba(255,255,255,0.7); display:block; margin-bottom:5px;">اسم المستخدم</label>
+                    <input type="text" id="editUsername" value="${student.username}" required style="width:100%; padding:12px; border-radius:12px; border:2px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.05); color:white;">
+                </div>
+                <div class="input-group" style="margin-bottom:15px;">
+                    <label style="color:rgba(255,255,255,0.7); display:block; margin-bottom:5px;">كلمة المرور</label>
+                    <input type="text" id="editPassword" value="${student.password}" required style="width:100%; padding:12px; border-radius:12px; border:2px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.05); color:white;">
+                </div>
+                <button type="submit" style="width:100%; padding:14px; background:linear-gradient(135deg, #e8b931, #d4a017); color:#0a1628; border:none; border-radius:30px; cursor:pointer; font-family:'Cairo'; font-weight:700; font-size:16px; transition:0.3s;">
+                    <i class="fas fa-save"></i> حفظ التعديلات
+                </button>
+            </form>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    document.getElementById('editStudentForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const username = document.getElementById('editUsername').value.replace(/\s/g, '');
+        const existingStudent = appData.students.find(s => 
+            s.username.replace(/\s/g, '') === username && s.id !== studentId
+        );
+        
+        if (existingStudent) {
+            showToast('اسم المستخدم موجود مسبقاً', 'error');
+            return;
+        }
+
+        const classId = parseInt(document.getElementById('editClass').value);
+        const cls = appData.classes.find(c => c.id === classId);
+
+        const index = appData.students.findIndex(s => s.id === studentId);
+        if (index !== -1) {
+            appData.students[index] = {
+                ...appData.students[index],
+                name: document.getElementById('editName').value,
+                phone: document.getElementById('editPhone').value,
+                classId: classId,
+                className: cls?.name || '',
+                username: username,
+                password: document.getElementById('editPassword').value
+            };
+            
+            await saveAllDataToFirebase();
+            showToast('✅ تم تحديث بيانات الطالب بنجاح');
+            modal.remove();
+            renderStudentsTable();
+            renderAdminDashboard();
+        }
+    });
+}
+
+// ==================== SEND WHATSAPP MESSAGE ====================
+function sendWhatsApp(studentId) {
+    const student = appData.students.find(s => s.id === studentId);
+    if (!student) {
+        showToast('الطالب غير موجود', 'error');
+        return;
+    }
+
+    if (!student.phone) {
+        showToast('⚠️ هذا الطالب ليس لديه رقم هاتف مسجل', 'warning');
+        return;
+    }
+
+    // تنظيف رقم الهاتف
+    let phone = student.phone.replace(/\s/g, '').replace(/^0+/, '');
+    if (!phone.startsWith('2')) {
+        phone = '2' + phone;
+    }
+
+    // إنشاء رسالة ترحيبية جميلة مع نصائح تسجيل الدخول
+    const message = `🎉 *مرحباً بك في The Best Academy!* 🎉
+
+📚 *أهلاً وسهلاً بك ${student.name}*
+
+تم قبولك في أكاديميتنا المتميزة تحت إشراف 
+👩‍🏫 *Ms: Amira Sobhy*
+
+━━━━━━━━━━━━━━━━━━━
+🔑 *بيانات الدخول الخاصة بك:*
+━━━━━━━━━━━━━━━━━━━
+👤 *اسم المستخدم:* ${student.username}
+🔒 *كلمة المرور:* ${student.password}
+
+━━━━━━━━━━━━━━━━━━━
+📌 *نصائح مهمة لتسجيل الدخول:*
+━━━━━━━━━━━━━━━━━━━
+
+1️⃣ *احفظ بيانات الدخول* 📝
+   - احتفظ باسم المستخدم وكلمة المرور في مكان آمن
+   - لا تشاركها مع أي شخص آخر
+
+2️⃣ *انتبه للحروف (كابتن / سمول)* 🔤
+   - اسم المستخدم *غير حساس* لحالة الحروف ✅
+   - كلمة المرور *حساسة* لحالة الحروف ❗
+   - مثال: إذا كانت كلمة المرور *Ahmed123* 
+   - لا تكتب *ahmed123* أو *AHMED123*
+
+3️⃣ *طريقة تسجيل الدخول الصحيحة:* 🖥️
+   - ادخل على رابط المنصة
+   - اكتب اسم المستخدم كما هو
+   - اكتب كلمة المرور بنفس الحروف (كابتن/سمول)
+   - اضغط على زر "دخول"
+
+4️⃣ *إذا نسيت البيانات:* 🤔
+   - تواصل مع المدير عبر واتساب
+   - أو اطلب إعادة تعيين كلمة المرور
+
+5️⃣ *نصائح إضافية:* 💡
+   - استخدم متصفح Chrome أو Edge للدخول
+   - تأكد من اتصال الإنترنت قبل تسجيل الدخول
+   - إذا واجهتك مشكلة، أعد تحميل الصفحة
+
+━━━━━━━━━━━━━━━━━━━
+🌟 *نصائح للنجاح في الأكاديمية:*
+━━━━━━━━━━━━━━━━━━━
+• حل جميع الواجبات في مواعيدها 📝
+• تابع الاجتماعات الأسبوعية 📅
+• اجمع أكبر عدد من النقاط ⭐
+• شارك في الأنشطة التفاعلية 🎯
+
+━━━━━━━━━━━━━━━━━━━
+📱 *رابط المنصة:*
+https://the-best-academy.vercel.app
+━━━━━━━━━━━━━━━━━━━
+
+💪 *نتمنى لك رحلة تعليمية ممتعة ومفيدة!*
+
+_The Best Academy 🏆_
+_مع Ms: Amira Sobhy_`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
+    
+    window.open(whatsappUrl, '_blank');
+}
+
+
+// ==================== OPEN WHATSAPP CHAT ====================
+function openWhatsApp(studentId) {
+    const student = appData.students.find(s => s.id === studentId);
+    if (!student) {
+        showToast('الطالب غير موجود', 'error');
+        return;
+    }
+
+    if (!student.phone) {
+        showToast('⚠️ هذا الطالب ليس لديه رقم هاتف مسجل', 'warning');
+        return;
+    }
+
+    let phone = student.phone.replace(/\s/g, '').replace(/^0+/, '');
+    if (!phone.startsWith('2')) {
+        phone = '2' + phone;
+    }
+
+    window.open(`https://wa.me/${phone}`, '_blank');
+}
+
 
      // ==================== الدالة 7: تحديث startApp ====================
 async function startApp() {
@@ -8344,6 +8608,9 @@ window.exportExamDetailsToPDF = exportExamDetailsToPDF;
 window.renderAdminExamsList = renderAdminExamsList;
 window.togglePasswordVisibility = togglePasswordVisibility;
 window.exportStudentsToPDF = exportStudentsToPDF;
+window.showEditStudentModal = showEditStudentModal;
+window.sendWhatsApp = sendWhatsApp;
+window.openWhatsApp = openWhatsApp;
 
         // Start the app
         startApp();
