@@ -4258,19 +4258,19 @@ function renderAdminMeetings() {
     if (!container) return;
 
     let html = `
-        <div class="card" style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); border-radius:20px; padding:20px; margin-bottom:25px; border:1px solid rgba(232,185,49,0.08);">
-            <h3 style="color:#e8b931; margin-bottom:18px; font-size:18px; font-weight:700; display:flex; align-items:center; gap:10px; border-bottom:2px solid rgba(232,185,49,0.1); padding-bottom:10px;">
+        <div style="background:rgba(255,255,255,0.02); border-radius:16px; padding:16px; border:1px solid rgba(232,185,49,0.06);">
+            <h3 style="color:#e8b931; margin-bottom:14px; font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px; border-bottom:2px solid rgba(232,185,49,0.06); padding-bottom:10px;">
                 <i class="fas fa-calendar-alt"></i> إدارة الاجتماعات
             </h3>
-            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
-                <button class="btn btn-primary" onclick="showAddMeetingModal()" style="background:#e8b931; color:#0a1628;">
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+                <button class="btn btn-primary" onclick="showAddMeetingModal()" style="background:#e8b931; color:#0a1628; padding:8px 18px; border:none; border-radius:30px; cursor:pointer; font-family:'Cairo'; font-weight:600; font-size:13px; display:flex; align-items:center; gap:6px;">
                     <i class="fas fa-plus"></i> إضافة اجتماع
                 </button>
-                <select id="meetingClassFilter" onchange="renderAdminMeetings()" style="padding:10px; border-radius:30px; border:2px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.05); color:white;">
+                <select id="meetingClassFilter" onchange="renderAdminMeetings()" style="padding:8px 14px; border-radius:30px; border:2px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.02); color:#fff; font-family:'Cairo'; font-size:12px; cursor:pointer; outline:none; min-width:100px;">
                     <option value="all">كل الفصول</option>
                     ${appData.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
                 </select>
-                <select id="meetingStatusFilter" onchange="renderAdminMeetings()" style="padding:10px; border-radius:30px; border:2px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.05); color:white;">
+                <select id="meetingStatusFilter" onchange="renderAdminMeetings()" style="padding:8px 14px; border-radius:30px; border:2px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.02); color:#fff; font-family:'Cairo'; font-size:12px; cursor:pointer; outline:none; min-width:100px;">
                     <option value="all">كل الاجتماعات</option>
                     <option value="upcoming">⏳ قادمة</option>
                     <option value="ongoing">🔴 جارية</option>
@@ -4283,8 +4283,6 @@ function renderAdminMeetings() {
     container.innerHTML = html;
 
     renderAdminMeetingsList();
-    
-    // بدء تحديث العدادات التلقائي
     startAdminMeetingCountdown();
 }
 
@@ -4481,22 +4479,16 @@ function renderStudentMeetings() {
 
     const student = currentUser;
     const classMeetings = appData.meetings.filter(m => m.classId === student.classId);
-
     classMeetings.sort((a, b) => new Date(a.meetingTime) - new Date(b.meetingTime));
 
-    // شيل attendance نهائياً من العرض
-    // const attendedMeetings = appData.meetingAttendance
-    //     .filter(a => a.studentId === student.id && a.status === 'attended')
-    //     .map(a => a.meetingId);
-
     container.innerHTML = `
-        <div class="card" style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); border-radius:20px; padding:20px; margin-bottom:25px; border:1px solid rgba(232,185,49,0.08);">
-            <h3 style="color:#e8b931; margin-bottom:18px; font-size:18px; font-weight:700; display:flex; align-items:center; gap:10px; border-bottom:2px solid rgba(232,185,49,0.1); padding-bottom:10px;">
+        <div style="background:rgba(255,255,255,0.02); border-radius:16px; padding:16px; border:1px solid rgba(232,185,49,0.06);">
+            <h3 style="color:#e8b931; margin-bottom:14px; font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px; border-bottom:2px solid rgba(232,185,49,0.06); padding-bottom:10px;">
                 <i class="fas fa-calendar-alt"></i> الاجتماعات
             </h3>
             <div id="studentMeetingsList">
                 ${classMeetings.length === 0 ? 
-                    '<p style="text-align:center; color:rgba(255,255,255,0.3); padding:30px;">📅 لا توجد اجتماعات</p>' :
+                    '<p style="text-align:center; color:rgba(255,255,255,0.2); padding:20px; font-size:14px;">📅 لا توجد اجتماعات</p>' :
                     classMeetings.map(meeting => {
                         const now = new Date();
                         const meetingDate = new Date(meeting.meetingTime);
@@ -4504,7 +4496,6 @@ function renderStudentMeetings() {
                         const isUpcoming = meetingDate > now && !isEnded;
                         const isOngoing = !isUpcoming && !isEnded;
                         
-                        // عداد
                         let timeLeft = '';
                         let canJoin = false;
                         
@@ -4545,41 +4536,41 @@ function renderStudentMeetings() {
                         }
 
                         return `
-                            <div style="background:rgba(255,255,255,0.03); border-radius:15px; padding:15px; margin-bottom:15px; border-right:4px solid ${statusColor};">
-                                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
-                                    <div style="flex:1;">
-                                        <strong style="color:#e8b931; font-size:16px;">
+                            <div style="background:rgba(255,255,255,0.02); border-radius:12px; padding:12px; margin-bottom:10px; border-right:3px solid ${statusColor};">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+                                    <div style="flex:1; min-width:120px;">
+                                        <strong style="color:#e8b931; font-size:15px;">
                                             <i class="fas fa-video"></i> ${escapeHtml(meeting.title)}
                                         </strong>
                                         <br>
-                                        <small style="color:rgba(255,255,255,0.3);">
+                                        <small style="color:rgba(255,255,255,0.25); font-size:12px;">
                                             📅 ${new Date(meeting.meetingTime).toLocaleString('ar-EG')}
                                         </small>
-                                        ${meeting.description ? `<br><small style="color:rgba(255,255,255,0.4);">${escapeHtml(meeting.description)}</small>` : ''}
+                                        ${meeting.description ? `<br><small style="color:rgba(255,255,255,0.2); font-size:12px;">${escapeHtml(meeting.description)}</small>` : ''}
                                         <br>
-                                        <div style="margin-top:8px; padding:10px 15px; background:rgba(255,255,255,0.05); border-radius:10px; display:inline-block; min-width:200px;">
-                                            <span style="color:${isEnded ? '#95a5a6' : isOngoing ? '#e74c3c' : '#f39c12'};">
+                                        <div style="margin-top:6px; padding:6px 12px; background:rgba(255,255,255,0.02); border-radius:8px; display:inline-block;">
+                                            <span style="color:${isEnded ? '#95a5a6' : isOngoing ? '#e74c3c' : '#f39c12'}; font-size:13px;">
                                                 ${isEnded ? '✅ انتهى الاجتماع' : isOngoing ? '⏱️ الوقت المنقضي:' : '⏳ الوقت المتبقي:'}
                                             </span>
-                                            ${!isEnded ? `<strong style="color:#e8b931; font-size:22px; margin-right:10px; direction:ltr; display:inline-block; font-family: monospace;">${timeLeft}</strong>` : ''}
+                                            ${!isEnded ? `<strong style="color:#e8b931; font-size:18px; margin-right:8px; direction:ltr; display:inline-block; font-family:monospace;">${timeLeft}</strong>` : ''}
                                         </div>
                                         <br>
-                                        <span style="display:inline-block; margin-top:5px; background:${statusColor}20; color:${statusColor}; padding:2px 12px; border-radius:20px; font-size:12px;">
+                                        <span style="display:inline-block; margin-top:4px; background:${statusColor}15; color:${statusColor}; padding:2px 10px; border-radius:16px; font-size:11px;">
                                             ${statusText}
                                         </span>
                                     </div>
-                                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                                    <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
                                         ${canJoin ? `
-                                            <a href="${meeting.meetingLink}" target="_blank" style="background:#2ecc71; color:#0a1628; padding:8px 20px; border:none; border-radius:30px; cursor:pointer; font-family:'Cairo'; font-weight:700; text-decoration:none; display:inline-block; transition:0.3s;">
-                                                <i class="fas fa-video"></i> انضم للاجتماع
+                                            <a href="${meeting.meetingLink}" target="_blank" style="background:#2ecc71; color:#0a1628; padding:6px 16px; border:none; border-radius:30px; cursor:pointer; font-family:'Cairo'; font-weight:700; text-decoration:none; display:inline-block; font-size:13px;">
+                                                <i class="fas fa-video"></i> انضم
                                             </a>
                                         ` : isEnded ? `
-                                            <span style="color:rgba(255,255,255,0.3); padding:8px 16px; border-radius:30px; border:1px dashed rgba(255,255,255,0.1);">
-                                                📅 انتهى الاجتماع
+                                            <span style="color:rgba(255,255,255,0.2); padding:6px 14px; border-radius:30px; border:1px dashed rgba(255,255,255,0.05); font-size:12px;">
+                                                📅 انتهى
                                             </span>
                                         ` : isUpcoming ? `
-                                            <span style="color:rgba(255,255,255,0.3); padding:8px 16px; border-radius:30px; border:1px dashed rgba(255,255,255,0.1);">
-                                                ⏳ انتظر بدء الاجتماع
+                                            <span style="color:rgba(255,255,255,0.2); padding:6px 14px; border-radius:30px; border:1px dashed rgba(255,255,255,0.05); font-size:12px;">
+                                                ⏳ انتظر
                                             </span>
                                         ` : ''}
                                     </div>
@@ -4592,7 +4583,6 @@ function renderStudentMeetings() {
         </div>
     `;
 
-    // بدء تحديث العدادات كل ثانية
     if (classMeetings.length > 0) {
         if (window.meetingInterval) clearInterval(window.meetingInterval);
         window.meetingInterval = setInterval(() => {
@@ -5091,8 +5081,7 @@ function filterHomeworkDetails(filter, homeworkId) {
 }
 
 
-        // ==================== ADMIN DASHBOARD ====================
-       function renderAdminDashboard() {
+  function renderAdminDashboard() {
     const app = document.getElementById('app');
     
     const totalStudents = appData.students.length;
@@ -5106,93 +5095,195 @@ function filterHomeworkDetails(filter, homeworkId) {
             <span></span><span></span><span></span>
         </div>
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
-        <div class="sidebar" id="sidebar" style="background:linear-gradient(180deg, #0a1628, #152238); border-left:1px solid rgba(232,185,49,0.15);">
+        <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <img src="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png" alt="The Best Academy" class="sidebar-logo" style="width:50px; height:50px; border-radius:50%; border:2px solid #e8b931;">
-                <h3 style="color:#e8b931;">The Best Academy</h3>
-                <p style="color:rgba(255,255,255,0.4);">لوحة تحكم المدير</p>
+                <img src="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png" alt="The Best Academy" class="sidebar-logo">
+                <h3>The Best Academy</h3>
+                <p>لوحة تحكم المدير</p>
             </div>
-            <ul class="sidebar-menu" style="list-style:none; padding:0;">
-                <li class="active" data-page="dashboard"><a onclick="changeAdminPage('dashboard')" style="display:flex; align-items:center; gap:12px; padding:12px 20px; color:rgba(255,255,255,0.7); text-decoration:none; cursor:pointer;"><i class="fas fa-chart-line" style="color:#e8b931;"></i> لوحة التحكم</a></li>
-                <li data-page="students"><a onclick="changeAdminPage('students')" style="display:flex; align-items:center; gap:12px; padding:12px 20px; color:rgba(255,255,255,0.7); text-decoration:none; cursor:pointer;"><i class="fas fa-user-graduate" style="color:#e8b931;"></i> إدارة الطلاب</a></li>
-                <li data-page="classes"><a onclick="changeAdminPage('classes')" style="display:flex; align-items:center; gap:12px; padding:12px 20px; color:rgba(255,255,255,0.7); text-decoration:none; cursor:pointer;"><i class="fas fa-layer-group" style="color:#e8b931;"></i> إدارة الفصول</a></li>
+            <ul class="sidebar-menu">
+                <li class="active" data-page="dashboard"><a onclick="changeAdminPage('dashboard')"><i class="fas fa-chart-line"></i> لوحة التحكم</a></li>
+                <li data-page="students"><a onclick="changeAdminPage('students')"><i class="fas fa-user-graduate"></i> إدارة الطلاب</a></li>
+                <li data-page="classes"><a onclick="changeAdminPage('classes')"><i class="fas fa-layer-group"></i> إدارة الفصول</a></li>
                 <li data-page="meetings"><a onclick="changeAdminPage('meetings')"><i class="fas fa-calendar-alt"></i> الاجتماعات</a></li>
-                <li data-page="homework"><a onclick="changeAdminPage('homework')" style="display:flex; align-items:center; gap:12px; padding:12px 20px; color:rgba(255,255,255,0.7); text-decoration:none; cursor:pointer;"><i class="fas fa-file-alt" style="color:#e8b931;"></i> الواجبات</a></li>
-                <li data-page="exams"><a onclick="changeAdminPage('exams')" style="display:flex; align-items:center; gap:12px; padding:12px 20px; color:rgba(255,255,255,0.7); text-decoration:none; cursor:pointer;">
-    <i class="fas fa-pencil-alt" style="color:#e8b931;"></i> الاختبارات
-</a></li>
-                <li data-page="results"><a onclick="changeAdminPage('results')" style="display:flex; align-items:center; gap:12px; padding:12px 20px; color:rgba(255,255,255,0.7); text-decoration:none; cursor:pointer;"><i class="fas fa-chart-bar" style="color:#e8b931;"></i> النتائج</a></li>
-                <li style="margin-top:20px; border-top:1px solid rgba(232,185,49,0.1);">
-                    <a onclick="logout()" style="display:flex; align-items:center; gap:12px; padding:12px 20px; color:#e74c3c; text-decoration:none; cursor:pointer;"><i class="fas fa-sign-out-alt" style="color:#e74c3c;"></i> تسجيل الخروج</a>
-                </li>
+                <li data-page="homework"><a onclick="changeAdminPage('homework')"><i class="fas fa-file-alt"></i> الواجبات</a></li>
+                <li data-page="exams"><a onclick="changeAdminPage('exams')"><i class="fas fa-pencil-alt"></i> الاختبارات</a></li>
+                <li data-page="results"><a onclick="changeAdminPage('results')"><i class="fas fa-chart-bar"></i> النتائج</a></li>
+                <li><a onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a></li>
             </ul>
         </div>
 
-        <div class="header" style="background:rgba(10,22,40,0.95); backdrop-filter:blur(10px); padding:10px 20px; margin-right:80px; margin-left:20px; margin-top:20px; border-radius:20px; border:1px solid rgba(232,185,49,0.1); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-            <div style="display:flex; align-items:center; gap:10px; cursor: pointer;" onclick="renderLandingPage()">
-    <img src="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png" alt="The Best Academy" style="width:40px; height:40px; border-radius:50%; border:2px solid #6C4CE0;">
-    <div class="logo-text">
-        <h1 style="font-size:16px; color:#6C4CE0; margin:0;">The Best <span style="color:#fff;">Academy</span></h1>
-        <p style="font-size:9px; color:rgba(255,255,255,0.3); margin:0;">🏆 Ms: Amira Sobhy</p>
-    </div>
-</div>
-            <div class="user-info" style="display:flex; gap:10px; align-items:center; background:rgba(255,255,255,0.03); padding:5px 12px; border-radius:40px;">
-                <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleTheme()" title="تغيير الوضع" style="width:40px; height:40px; border-radius:50%; border:2px solid #e8b931; background:rgba(255,255,255,0.05); color:#e8b931; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.3s ease; font-size:18px;">
+        <!-- ===== HEADER ===== -->
+        <div style="
+            background: rgba(10,22,40,0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 18px;
+            margin: 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(232,185,49,0.12);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        ">
+            <!-- القسم الأيسر: اللوجو -->
+            <div style="
+                display: flex; 
+                align-items: center; 
+                gap: 12px; 
+                cursor: pointer;
+            " onclick="renderLandingPage()">
+                <img src="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png" 
+                     alt="The Best Academy" 
+                     style="
+                         width: 45px; 
+                         height: 45px; 
+                         border-radius: 50%; 
+                         border: 2.5px solid #e8b931;
+                         object-fit: cover;
+                         box-shadow: 0 0 20px rgba(232,185,49,0.15);
+                     ">
+                <div>
+                    <h1 style="
+                        font-size: 18px; 
+                        color: #e8b931; 
+                        margin: 0; 
+                        line-height: 1.2;
+                        font-weight: 800;
+                    ">
+                        The Best 
+                        <span style="color: #fff;">Academy</span>
+                    </h1>
+                    <p style="
+                        font-size: 11px; 
+                        color: rgba(255,255,255,0.35); 
+                        margin: 0; 
+                        line-height: 1.2;
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                    ">
+                        <i class="fas fa-chalkboard-teacher" style="color: #e8b931; font-size: 10px;"></i>
+                        Ms: Amira Sobhy
+                    </p>
+                </div>
+            </div>
+
+            <!-- القسم الأيمن: معلومات المستخدم والأزرار -->
+            <div style="
+                display: flex; 
+                gap: 8px; 
+                align-items: center; 
+                background: rgba(255,255,255,0.04); 
+                padding: 6px 14px 6px 10px; 
+                border-radius: 50px; 
+                flex-wrap: wrap;
+                border: 1px solid rgba(232,185,49,0.06);
+            ">
+                <!-- زر الثيم -->
+                <button id="themeToggleBtn" 
+                        onclick="toggleTheme()" 
+                        style="
+                            width: 36px; 
+                            height: 36px; 
+                            border-radius: 50%; 
+                            border: 2px solid #e8b931; 
+                            background: rgba(255,255,255,0.05); 
+                            color: #e8b931; 
+                            cursor: pointer; 
+                            display: flex; 
+                            align-items: center; 
+                            justify-content: center; 
+                            font-size: 15px;
+                            transition: all 0.3s ease;
+                        "
+                        onmouseover="this.style.background='rgba(232,185,49,0.15)'"
+                        onmouseout="this.style.background='rgba(255,255,255,0.05)'">
                     <i class="fas ${document.body.classList.contains('light-mode') ? 'fa-sun' : 'fa-moon'}"></i>
                 </button>
-                <i class="fas fa-user-cog" style="color:#e8b931;"></i>
-                <span style="color:rgba(255,255,255,0.8);">المدير</span>
-                <button class="logout-btn" onclick="logout()" style="background:linear-gradient(135deg, #c0392b, #e74c3c); color:white; border:none; padding:5px 12px; border-radius:30px; cursor:pointer; font-size:12px; font-weight:600; display:flex; align-items:center; gap:5px;">
+
+                <!-- أيقونة المستخدم -->
+                <i class="fas fa-user-cog" style="color: #e8b931; font-size: 16px;"></i>
+                
+                <!-- اسم المستخدم -->
+                <span style="
+                    color: rgba(255,255,255,0.85); 
+                    font-size: 15px; 
+                    font-weight: 600;
+                ">المدير</span>
+
+                <!-- زر الخروج -->
+                <button onclick="logout()" 
+                        style="
+                            background: linear-gradient(135deg, #c0392b, #e74c3c); 
+                            color: white; 
+                            border: none; 
+                            padding: 6px 14px; 
+                            border-radius: 30px; 
+                            cursor: pointer; 
+                            font-size: 12px; 
+                            font-weight: 600; 
+                            display: flex; 
+                            align-items: center; 
+                            gap: 5px;
+                            transition: all 0.3s ease;
+                        "
+                        onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 15px rgba(231,76,60,0.3)'"
+                        onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">
                     <i class="fas fa-sign-out-alt"></i> خروج
                 </button>
             </div>
         </div>
 
-        <div class="main-content" style="margin-right:80px; margin-left:20px; margin-top:20px; padding:15px; min-height:calc(100vh - 140px);">
+        <!-- ===== MAIN CONTENT ===== -->
+        <div class="main-content" style="margin:10px; padding:10px; min-height:calc(100vh - 140px);">
             <div id="adminPageContent">
-                <div class="stats-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:20px; margin-bottom:30px;">
-                    <div class="stat-card" style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); padding:20px; border-radius:20px; text-align:center; border:1px solid rgba(232,185,49,0.08);">
-                        <i class="fas fa-user-graduate" style="color:#e8b931; font-size:36px; margin-bottom:10px;"></i>
-                        <div class="number" style="color:#e8b931; font-size:28px; font-weight:bold;">${totalStudents}</div>
-                        <div class="label" style="color:rgba(255,255,255,0.5);">👨‍🎓 عدد الطلاب</div>
+                <div class="stats-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:12px; margin-bottom:20px;">
+                    <div class="stat-card" style="background:rgba(255,255,255,0.03); padding:15px; border-radius:16px; text-align:center; border:1px solid rgba(232,185,49,0.06);">
+                        <i class="fas fa-user-graduate" style="color:#e8b931; font-size:28px; margin-bottom:6px;"></i>
+                        <div class="number" style="color:#e8b931; font-size:24px; font-weight:bold;">${totalStudents}</div>
+                        <div class="label" style="color:rgba(255,255,255,0.4); font-size:12px;">👨‍🎓 عدد الطلاب</div>
                     </div>
-                    <div class="stat-card" style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); padding:20px; border-radius:20px; text-align:center; border:1px solid rgba(232,185,49,0.08);">
-                        <i class="fas fa-layer-group" style="color:#e8b931; font-size:36px; margin-bottom:10px;"></i>
-                        <div class="number" style="color:#e8b931; font-size:28px; font-weight:bold;">${totalClasses}</div>
-                        <div class="label" style="color:rgba(255,255,255,0.5);">📚 الفصول</div>
+                    <div class="stat-card" style="background:rgba(255,255,255,0.03); padding:15px; border-radius:16px; text-align:center; border:1px solid rgba(232,185,49,0.06);">
+                        <i class="fas fa-layer-group" style="color:#e8b931; font-size:28px; margin-bottom:6px;"></i>
+                        <div class="number" style="color:#e8b931; font-size:24px; font-weight:bold;">${totalClasses}</div>
+                        <div class="label" style="color:rgba(255,255,255,0.4); font-size:12px;">📚 الفصول</div>
                     </div>
-                    <div class="stat-card" style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); padding:20px; border-radius:20px; text-align:center; border:1px solid rgba(232,185,49,0.08);">
-                        <i class="fas fa-file-alt" style="color:#e8b931; font-size:36px; margin-bottom:10px;"></i>
-                        <div class="number" style="color:#e8b931; font-size:28px; font-weight:bold;">${totalHomeworks}</div>
-                        <div class="label" style="color:rgba(255,255,255,0.5);">📝 الواجبات</div>
+                    <div class="stat-card" style="background:rgba(255,255,255,0.03); padding:15px; border-radius:16px; text-align:center; border:1px solid rgba(232,185,49,0.06);">
+                        <i class="fas fa-file-alt" style="color:#e8b931; font-size:28px; margin-bottom:6px;"></i>
+                        <div class="number" style="color:#e8b931; font-size:24px; font-weight:bold;">${totalHomeworks}</div>
+                        <div class="label" style="color:rgba(255,255,255,0.4); font-size:12px;">📝 الواجبات</div>
                     </div>
-                    <div class="stat-card" style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); padding:20px; border-radius:20px; text-align:center; border:1px solid rgba(232,185,49,0.08);">
-                        <i class="fas fa-star" style="color:#e8b931; font-size:36px; margin-bottom:10px;"></i>
-                        <div class="number" style="color:#e8b931; font-size:28px; font-weight:bold;">${totalPoints}</div>
-                        <div class="label" style="color:rgba(255,255,255,0.5);">⭐ إجمالي النقاط</div>
+                    <div class="stat-card" style="background:rgba(255,255,255,0.03); padding:15px; border-radius:16px; text-align:center; border:1px solid rgba(232,185,49,0.06);">
+                        <i class="fas fa-star" style="color:#e8b931; font-size:28px; margin-bottom:6px;"></i>
+                        <div class="number" style="color:#e8b931; font-size:24px; font-weight:bold;">${totalPoints}</div>
+                        <div class="label" style="color:rgba(255,255,255,0.4); font-size:12px;">⭐ إجمالي النقاط</div>
                     </div>
-<div class="stat-card" style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); padding:20px; border-radius:20px; text-align:center; border:1px solid rgba(232,185,49,0.08); cursor:pointer;" onclick="showPendingRequestsModal()">
-    <i class="fas fa-clock" style="color:#f39c12; font-size:36px; margin-bottom:10px;"></i>
-    <div class="number" style="color:#f39c12; font-size:28px; font-weight:bold;">${pendingStudents}</div>
-    <div class="label" style="color:rgba(255,255,255,0.5);">⏳ طلبات انضمام</div>
-</div>
+                    <div class="stat-card" style="background:rgba(255,255,255,0.03); padding:15px; border-radius:16px; text-align:center; border:1px solid rgba(232,185,49,0.06); cursor:pointer;" onclick="showPendingRequestsModal()">
+                        <i class="fas fa-clock" style="color:#f39c12; font-size:28px; margin-bottom:6px;"></i>
+                        <div class="number" style="color:#f39c12; font-size:24px; font-weight:bold;">${pendingStudents}</div>
+                        <div class="label" style="color:rgba(255,255,255,0.4); font-size:12px;">⏳ طلبات انضمام</div>
+                    </div>
                 </div>
 
-                <div class="card" style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); border-radius:20px; padding:20px; margin-bottom:25px; border:1px solid rgba(232,185,49,0.08);">
-                    <h3 style="color:#e8b931; margin-bottom:18px; font-size:18px; font-weight:700; display:flex; align-items:center; gap:10px; border-bottom:2px solid rgba(232,185,49,0.1); padding-bottom:10px;"><i class="fas fa-trophy"></i> ترتيب الطلاب حسب النقاط</h3>
+                <div class="card" style="background:rgba(255,255,255,0.02); border-radius:16px; padding:16px; border:1px solid rgba(232,185,49,0.06);">
+                    <h3 style="color:#e8b931; margin-bottom:14px; font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px; border-bottom:2px solid rgba(232,185,49,0.06); padding-bottom:10px;">
+                        <i class="fas fa-trophy"></i> ترتيب الطلاب حسب النقاط
+                    </h3>
                     <div id="adminRankingList"></div>
                 </div>
             </div>
         </div>
 
-        <div class="footer" style="background:rgba(10,22,40,0.95); color:rgba(255,255,255,0.3); padding:15px; text-align:center; margin-top:30px; border-top:1px solid rgba(232,185,49,0.05);">
-            <p>© 2025 <span style="color:#e8b931;">The Best Academy</span> | Ms: Amira Sobhy | جميع الحقوق محفوظة</p>
+        <div class="footer" style="background:rgba(10,22,40,0.95); color:rgba(255,255,255,0.2); padding:12px; text-align:center; margin-top:20px; border-top:1px solid rgba(232,185,49,0.04); font-size:12px;">
+            <p>© 2025 <span style="color:#e8b931;">The Best Academy</span> | Ms: Amira Sobhy</p>
         </div>
     `;
 
     renderAdminRanking();
-        renderAdminClassRanking();
-
+    renderAdminClassRanking();
     initTheme();
 }
 
@@ -5429,23 +5520,22 @@ async function rejectStudentRequest(studentId) {
     renderAdminDashboard();
 }
 
-// ==================== ADMIN - EXAMS ====================
 function renderAdminExams() {
     const container = document.getElementById('adminPageContent');
     container.innerHTML = `
-        <div class="card" style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); border-radius:20px; padding:20px; margin-bottom:25px; border:1px solid rgba(232,185,49,0.08);">
-            <h3 style="color:#e8b931; margin-bottom:18px; font-size:18px; font-weight:700; display:flex; align-items:center; gap:10px; border-bottom:2px solid rgba(232,185,49,0.1); padding-bottom:10px;">
+        <div style="background:rgba(255,255,255,0.02); border-radius:16px; padding:16px; border:1px solid rgba(232,185,49,0.06);">
+            <h3 style="color:#e8b931; margin-bottom:14px; font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px; border-bottom:2px solid rgba(232,185,49,0.06); padding-bottom:10px;">
                 <i class="fas fa-pencil-alt"></i> إدارة الاختبارات
             </h3>
-            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
-                <button class="btn btn-primary" onclick="showAddExamModal()" style="background:#e8b931; color:#0a1628;">
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+                <button class="btn btn-primary" onclick="showAddExamModal()" style="background:#e8b931; color:#0a1628; padding:8px 18px; border:none; border-radius:30px; cursor:pointer; font-family:'Cairo'; font-weight:600; font-size:13px; display:flex; align-items:center; gap:6px;">
                     <i class="fas fa-plus"></i> إضافة اختبار
                 </button>
-                <select id="examClassFilter" onchange="renderAdminExamsList()" style="padding:10px; border-radius:30px; border:2px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.05); color:white;">
+                <select id="examClassFilter" onchange="renderAdminExamsList()" style="padding:8px 14px; border-radius:30px; border:2px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.02); color:#fff; font-family:'Cairo'; font-size:12px; cursor:pointer; outline:none; min-width:100px;">
                     <option value="all">كل الفصول</option>
                     ${appData.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
                 </select>
-                <select id="examStatusFilter" onchange="renderAdminExamsList()" style="padding:10px; border-radius:30px; border:2px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.05); color:white;">
+                <select id="examStatusFilter" onchange="renderAdminExamsList()" style="padding:8px 14px; border-radius:30px; border:2px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.02); color:#fff; font-family:'Cairo'; font-size:12px; cursor:pointer; outline:none; min-width:100px;">
                     <option value="all">كل الاختبارات</option>
                     <option value="active">🟢 نشط</option>
                     <option value="stopped">🔴 متوقف</option>
@@ -6051,255 +6141,84 @@ function exportExamDetailsToPDF(examId) {
 }
 
 
-   // ==================== ADMIN - STUDENTS (نسخة مطورة كاملة) ====================
-function renderAdminStudents() {
+   function renderAdminStudents() {
     const container = document.getElementById('adminPageContent');
     
-    // حساب الإحصائيات
     const totalStudents = appData.students.filter(s => s.status !== 'pending').length;
     const activeStudents = appData.students.filter(s => s.status === 'active').length;
     const pendingStudents = appData.students.filter(s => s.status === 'pending').length;
     const totalPoints = appData.students.reduce((sum, s) => sum + (s.points || 0), 0);
 
     container.innerHTML = `
-        <div style="
-            background: rgba(255,255,255,0.02);
-            backdrop-filter: blur(12px);
-            border-radius: 24px;
-            padding: 25px;
-            border: 1px solid rgba(232,185,49,0.06);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-        ">
-            <!-- ===== الهيدر ===== -->
-            <div style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                flex-wrap: wrap;
-                gap: 15px;
-                margin-bottom: 20px;
-                border-bottom: 2px solid rgba(232,185,49,0.06);
-                padding-bottom: 18px;
-            ">
+        <div style="background:rgba(255,255,255,0.02); border-radius:16px; padding:16px; border:1px solid rgba(232,185,49,0.06);">
+            <!-- Header -->
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:16px; border-bottom:2px solid rgba(232,185,49,0.06); padding-bottom:14px;">
                 <div>
-                    <h3 style="
-                        color: #e8b931;
-                        font-size: 24px;
-                        font-weight: 800;
-                        margin: 0;
-                        display: flex;
-                        align-items: center;
-                        gap: 12px;
-                    ">
-                        <i class="fas fa-user-graduate" style="color: #e8b931;"></i>
-                        إدارة الطلاب
-                        <span id="studentsCountBadge" style="
-                            background: rgba(232,185,49,0.12);
-                            color: #e8b931;
-                            font-size: 13px;
-                            padding: 2px 14px;
-                            border-radius: 20px;
-                            font-weight: 700;
-                        ">${totalStudents}</span>
+                    <h3 style="color:#e8b931; font-size:18px; font-weight:800; margin:0; display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-user-graduate"></i> إدارة الطلاب
+                        <span style="background:rgba(232,185,49,0.1); color:#e8b931; font-size:12px; padding:2px 12px; border-radius:20px; font-weight:700;">${totalStudents}</span>
                     </h3>
-                    <p style="color: rgba(255,255,255,0.25); font-size: 13px; margin: 4px 0 0;">
-                        <i class="fas fa-info-circle"></i> إدارة بيانات الطلاب وإرسال رسائل الترحيب
-                    </p>
+                    <p style="color:rgba(255,255,255,0.2); font-size:12px; margin:2px 0 0;">إدارة بيانات الطلاب</p>
                 </div>
-                <button class="btn btn-primary" onclick="showAddStudentModal()" style="
-                    background: linear-gradient(135deg, #e8b931, #d4a017);
-                    color: #0a1628;
-                    padding: 10px 26px;
-                    border: none;
-                    border-radius: 30px;
-                    cursor: pointer;
-                    font-family: 'Cairo', sans-serif;
-                    font-weight: 700;
-                    font-size: 14px;
-                    transition: all 0.3s ease;
-                    box-shadow: 0 4px 15px rgba(232,185,49,0.2);
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                " onmouseover="this.style.transform='translateY(-2px) scale(1.02)'; this.style.boxShadow='0 6px 25px rgba(232,185,49,0.35)'" 
-                onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 4px 15px rgba(232,185,49,0.2)'">
+                <button onclick="showAddStudentModal()" style="background:linear-gradient(135deg, #e8b931, #d4a017); color:#0a1628; padding:8px 18px; border:none; border-radius:30px; cursor:pointer; font-family:'Cairo'; font-weight:700; font-size:13px; display:flex; align-items:center; gap:6px;">
                     <i class="fas fa-plus-circle"></i> إضافة طالب
                 </button>
             </div>
 
-            <!-- ===== بطاقات الإحصائيات ===== -->
-            <div style="
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                gap: 12px;
-                margin-bottom: 20px;
-            ">
-                <div style="
-                    background: rgba(255,255,255,0.03);
-                    border-radius: 14px;
-                    padding: 14px;
-                    text-align: center;
-                    border: 1px solid rgba(232,185,49,0.06);
-                ">
-                    <div style="font-size: 28px; font-weight: 700; color: #e8b931;">${totalStudents}</div>
-                    <div style="font-size: 12px; color: rgba(255,255,255,0.3);">👨‍🎓 إجمالي الطلاب</div>
+            <!-- Stats -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(100px, 1fr)); gap:10px; margin-bottom:16px;">
+                <div style="background:rgba(255,255,255,0.02); border-radius:12px; padding:10px; text-align:center; border:1px solid rgba(232,185,49,0.04);">
+                    <div style="font-size:22px; font-weight:700; color:#e8b931;">${totalStudents}</div>
+                    <div style="font-size:11px; color:rgba(255,255,255,0.25);">👨‍🎓 إجمالي</div>
                 </div>
-                <div style="
-                    background: rgba(46,204,113,0.04);
-                    border-radius: 14px;
-                    padding: 14px;
-                    text-align: center;
-                    border: 1px solid rgba(46,204,113,0.08);
-                ">
-                    <div style="font-size: 28px; font-weight: 700; color: #2ecc71;">${activeStudents}</div>
-                    <div style="font-size: 12px; color: rgba(255,255,255,0.3);">✅ نشط</div>
+                <div style="background:rgba(46,204,113,0.03); border-radius:12px; padding:10px; text-align:center; border:1px solid rgba(46,204,113,0.06);">
+                    <div style="font-size:22px; font-weight:700; color:#2ecc71;">${activeStudents}</div>
+                    <div style="font-size:11px; color:rgba(255,255,255,0.25);">✅ نشط</div>
                 </div>
-                <div style="
-                    background: rgba(243,156,18,0.04);
-                    border-radius: 14px;
-                    padding: 14px;
-                    text-align: center;
-                    border: 1px solid rgba(243,156,18,0.08);
-                ">
-                    <div style="font-size: 28px; font-weight: 700; color: #f39c12;">${pendingStudents}</div>
-                    <div style="font-size: 12px; color: rgba(255,255,255,0.3);">⏳ بانتظار الموافقة</div>
+                <div style="background:rgba(243,156,18,0.03); border-radius:12px; padding:10px; text-align:center; border:1px solid rgba(243,156,18,0.06);">
+                    <div style="font-size:22px; font-weight:700; color:#f39c12;">${pendingStudents}</div>
+                    <div style="font-size:11px; color:rgba(255,255,255,0.25);">⏳ بانتظار</div>
                 </div>
-                <div style="
-                    background: rgba(155,89,182,0.04);
-                    border-radius: 14px;
-                    padding: 14px;
-                    text-align: center;
-                    border: 1px solid rgba(155,89,182,0.08);
-                ">
-                    <div style="font-size: 28px; font-weight: 700; color: #9b59b6;">${totalPoints}</div>
-                    <div style="font-size: 12px; color: rgba(255,255,255,0.3);">⭐ إجمالي النقاط</div>
+                <div style="background:rgba(155,89,182,0.03); border-radius:12px; padding:10px; text-align:center; border:1px solid rgba(155,89,182,0.06);">
+                    <div style="font-size:22px; font-weight:700; color:#9b59b6;">${totalPoints}</div>
+                    <div style="font-size:11px; color:rgba(255,255,255,0.25);">⭐ نقاط</div>
                 </div>
             </div>
 
-            <!-- ===== أدوات البحث والفلتر ===== -->
-            <div style="
-                display: flex;
-                gap: 12px;
-                flex-wrap: wrap;
-                margin-bottom: 20px;
-                background: rgba(255,255,255,0.02);
-                padding: 14px 16px;
-                border-radius: 16px;
-                border: 1px solid rgba(255,255,255,0.03);
-            ">
-                <!-- حقل البحث -->
-                <div style="flex: 2; min-width: 200px; position: relative;">
-                    <div style="position: relative;">
-                        <i class="fas fa-search" style="
-                            position: absolute;
-                            right: 16px;
-                            top: 50%;
-                            transform: translateY(-50%);
-                            color: rgba(255,255,255,0.15);
-                            font-size: 15px;
-                        "></i>
+            <!-- Filters -->
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; background:rgba(255,255,255,0.01); padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,0.02);">
+                <div style="flex:1; min-width:150px; position:relative;">
+                    <div style="position:relative;">
+                        <i class="fas fa-search" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color:rgba(255,255,255,0.1); font-size:13px;"></i>
                         <input type="text" 
                                id="studentSearch" 
-                               placeholder="🔍 ابحث بالاسم أو اسم المستخدم..." 
+                               placeholder="🔍 ابحث بالاسم..." 
                                oninput="filterStudentsWithSuggestions()"
                                onfocus="showSuggestions()"
                                onblur="setTimeout(hideSuggestions, 250)"
-                               style="
-                                   width: 100%;
-                                   padding: 10px 45px 10px 16px;
-                                   border-radius: 30px;
-                                   border: 2px solid rgba(255,255,255,0.05);
-                                   background: rgba(255,255,255,0.03);
-                                   color: #fff;
-                                   font-family: 'Cairo', sans-serif;
-                                   font-size: 14px;
-                                   transition: all 0.3s ease;
-                                   outline: none;
-                               "
-                               onfocus="this.style.borderColor='#e8b931'; this.style.boxShadow='0 0 0 4px rgba(232,185,49,0.06)'"
-                               onblur="this.style.borderColor='rgba(255,255,255,0.05)'; this.style.boxShadow='none'">
+                               style="width:100%; padding:8px 35px 8px 12px; border-radius:30px; border:2px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.02); color:#fff; font-family:'Cairo'; font-size:13px; outline:none;">
                     </div>
-                    <!-- صندوق الاقتراحات -->
-                    <div id="suggestionsBox" style="
-                        position: absolute;
-                        top: calc(100% + 6px);
-                        right: 0;
-                        left: 0;
-                        background: #0d1a2e;
-                        border-radius: 14px;
-                        border: 1px solid rgba(232,185,49,0.08);
-                        box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-                        max-height: 200px;
-                        overflow-y: auto;
-                        display: none;
-                        z-index: 100;
-                        padding: 6px 0;
-                    "></div>
+                    <div id="suggestionsBox" style="display:none; position:absolute; top:calc(100% + 4px); right:0; left:0; background:#0d1a2e; border-radius:12px; border:1px solid rgba(232,185,49,0.06); box-shadow:0 8px 30px rgba(0,0,0,0.5); max-height:180px; overflow-y:auto; z-index:100; padding:4px 0;"></div>
                 </div>
-
-                <!-- فلتر الفصل -->
-                <select id="classFilterStudents" onchange="filterStudentsWithSuggestions()" style="
-                    padding: 10px 18px;
-                    border-radius: 30px;
-                    border: 2px solid rgba(255,255,255,0.05);
-                    background: rgba(255,255,255,0.03);
-                    color: #fff;
-                    font-family: 'Cairo', sans-serif;
-                    font-size: 13px;
-                    cursor: pointer;
-                    outline: none;
-                    min-width: 120px;
-                " onfocus="this.style.borderColor='#e8b931'" onblur="this.style.borderColor='rgba(255,255,255,0.05)'">
+                <select id="classFilterStudents" onchange="filterStudentsWithSuggestions()" style="padding:8px 14px; border-radius:30px; border:2px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.02); color:#fff; font-family:'Cairo'; font-size:12px; cursor:pointer; outline:none; min-width:100px;">
                     <option value="all">📚 كل الفصول</option>
                     ${appData.classes.map(c => `<option value="${c.id}" style="background:#0d1a2e;">${c.name}</option>`).join('')}
                 </select>
-
-                <!-- فلتر الحالة -->
-                <select id="statusFilterStudents" onchange="filterStudentsWithSuggestions()" style="
-                    padding: 10px 18px;
-                    border-radius: 30px;
-                    border: 2px solid rgba(255,255,255,0.05);
-                    background: rgba(255,255,255,0.03);
-                    color: #fff;
-                    font-family: 'Cairo', sans-serif;
-                    font-size: 13px;
-                    cursor: pointer;
-                    outline: none;
-                    min-width: 120px;
-                " onfocus="this.style.borderColor='#e8b931'" onblur="this.style.borderColor='rgba(255,255,255,0.05)'">
+                <select id="statusFilterStudents" onchange="filterStudentsWithSuggestions()" style="padding:8px 14px; border-radius:30px; border:2px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.02); color:#fff; font-family:'Cairo'; font-size:12px; cursor:pointer; outline:none; min-width:100px;">
                     <option value="all">👤 الكل</option>
-                    <option value="active" style="background:#0d1a2e;">✅ نشط</option>
-                    <option value="pending" style="background:#0d1a2e;">⏳ بانتظار الموافقة</option>
+                    <option value="active">✅ نشط</option>
+                    <option value="pending">⏳ بانتظار</option>
                 </select>
-
-                <!-- زر تصدير PDF -->
-                <button onclick="exportStudentsToPDF()" style="
-                    background: linear-gradient(135deg, #e74c3c, #c0392b);
-                    color: white;
-                    padding: 10px 20px;
-                    border: none;
-                    border-radius: 30px;
-                    cursor: pointer;
-                    font-family: 'Cairo', sans-serif;
-                    font-weight: 600;
-                    font-size: 13px;
-                    transition: all 0.3s ease;
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    box-shadow: 0 4px 12px rgba(231,76,60,0.2);
-                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(231,76,60,0.3)'" 
-                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(231,76,60,0.2)'">
+                <button onclick="exportStudentsToPDF()" style="background:linear-gradient(135deg, #e74c3c, #c0392b); color:white; padding:8px 16px; border:none; border-radius:30px; cursor:pointer; font-family:'Cairo'; font-weight:600; font-size:12px; display:flex; align-items:center; gap:4px;">
                     <i class="fas fa-file-pdf"></i> PDF
                 </button>
             </div>
 
-            <!-- ===== جدول الطلاب ===== -->
-            <div id="studentsTable" style="overflow-x: auto;"></div>
+            <!-- Table -->
+            <div id="studentsTable" style="overflow-x:auto;"></div>
         </div>
     `;
 
-    // عرض الجدول
     renderStudentsTableWithSuggestions();
 }
 
@@ -6612,8 +6531,7 @@ function hideSuggestions() {
     }, 300);
 }
 
-        // ==================== STUDENT - EXAMS ====================
-function renderStudentExams() {
+        function renderStudentExams() {
     const container = document.getElementById('studentPageContent');
     if (!container) return;
 
@@ -6621,49 +6539,48 @@ function renderStudentExams() {
     const classExams = appData.exams.filter(e => e.classId === student.classId);
     classExams.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    // جلب حضور الطالب في الاختبارات
     const myAttendance = appData.examAttendance.filter(a => a.studentId === student.id);
 
     container.innerHTML = `
-        <div class="card" style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); border-radius:20px; padding:20px; margin-bottom:25px; border:1px solid rgba(232,185,49,0.08);">
-            <h3 style="color:#e8b931; margin-bottom:18px; font-size:18px; font-weight:700; display:flex; align-items:center; gap:10px; border-bottom:2px solid rgba(232,185,49,0.1); padding-bottom:10px;">
+        <div style="background:rgba(255,255,255,0.02); border-radius:16px; padding:16px; border:1px solid rgba(232,185,49,0.06);">
+            <h3 style="color:#e8b931; margin-bottom:14px; font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px; border-bottom:2px solid rgba(232,185,49,0.06); padding-bottom:10px;">
                 <i class="fas fa-pencil-alt"></i> الاختبارات
             </h3>
             <div id="studentExamsList">
                 ${classExams.length === 0 ? 
-                    '<p style="text-align:center; color:rgba(255,255,255,0.3); padding:30px;">📝 لا توجد اختبارات</p>' :
+                    '<p style="text-align:center; color:rgba(255,255,255,0.2); padding:20px; font-size:14px;">📝 لا توجد اختبارات</p>' :
                     classExams.map(exam => {
                         const isAttended = myAttendance.some(a => a.examId === exam.id);
                         const isStopped = exam.status === 'stopped';
                         
                         return `
-                            <div style="background:rgba(255,255,255,0.03); border-radius:15px; padding:15px; margin-bottom:15px; border-right:4px solid ${isStopped ? '#e74c3c' : isAttended ? '#2ecc71' : '#3498db'};">
-                                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
-                                    <div style="flex:1;">
-                                        <strong style="color:#e8b931; font-size:16px;">
+                            <div style="background:rgba(255,255,255,0.02); border-radius:12px; padding:12px; margin-bottom:10px; border-right:3px solid ${isStopped ? '#e74c3c' : isAttended ? '#2ecc71' : '#3498db'};">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+                                    <div style="flex:1; min-width:120px;">
+                                        <strong style="color:#e8b931; font-size:15px;">
                                             <i class="fas fa-pencil-alt"></i> ${escapeHtml(exam.title)}
                                         </strong>
-                                        ${exam.description ? `<br><small style="color:rgba(255,255,255,0.4);">${escapeHtml(exam.description)}</small>` : ''}
+                                        ${exam.description ? `<br><small style="color:rgba(255,255,255,0.2); font-size:12px;">${escapeHtml(exam.description)}</small>` : ''}
                                         <br>
-                                        <small style="color:rgba(255,255,255,0.3);">
+                                        <small style="color:rgba(255,255,255,0.25); font-size:12px;">
                                             ${isAttended ? '✅ تم الدخول' : isStopped ? '⛔ متوقف' : '📝 لم تدخل بعد'}
                                         </small>
-                                        ${isAttended ? `<br><small style="color:rgba(255,255,255,0.2);">⏱️ ${new Date(myAttendance.find(a => a.examId === exam.id)?.enteredAt).toLocaleString('ar-EG')}</small>` : ''}
+                                        ${isAttended ? `<br><small style="color:rgba(255,255,255,0.15); font-size:11px;">⏱️ ${new Date(myAttendance.find(a => a.examId === exam.id)?.enteredAt).toLocaleString('ar-EG')}</small>` : ''}
                                     </div>
-                                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                                    <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
                                         ${isStopped ? `
-                                            <span style="background:#e74c3c20; color:#e74c3c; padding:8px 20px; border-radius:30px; font-size:14px; font-weight:600;">
+                                            <span style="background:#e74c3c15; color:#e74c3c; padding:6px 16px; border-radius:30px; font-size:13px; font-weight:600;">
                                                 ⛔ متوقف
                                             </span>
                                         ` : isAttended ? `
-                                            <span style="background:#2ecc7120; color:#2ecc71; padding:8px 20px; border-radius:30px; font-size:14px; font-weight:600;">
+                                            <span style="background:#2ecc7115; color:#2ecc71; padding:6px 16px; border-radius:30px; font-size:13px; font-weight:600;">
                                                 ✅ تم الدخول
                                             </span>
                                         ` : `
                                             <a href="${exam.link}" target="_blank" 
-                                               style="background:linear-gradient(135deg, #e8b931, #d4a017); color:#0a1628; padding:10px 25px; border:none; border-radius:30px; cursor:pointer; font-family:'Cairo'; font-weight:700; text-decoration:none; display:inline-block; transition:0.3s;"
+                                               style="background:linear-gradient(135deg, #e8b931, #d4a017); color:#0a1628; padding:8px 20px; border:none; border-radius:30px; cursor:pointer; font-family:'Cairo'; font-weight:700; text-decoration:none; display:inline-block; font-size:13px;"
                                                onclick="markExamAttendance(${exam.id})">
-                                                <i class="fas fa-play"></i> بدء الاختبار
+                                                <i class="fas fa-play"></i> بدء
                                             </a>
                                         `}
                                     </div>
@@ -7200,22 +7117,23 @@ function exportStudentsToPDF() {
             showToast('تم حذف الطالب');
         }
 
-        // ==================== ADMIN - CLASSES ====================
-        function renderAdminClasses() {
-            const container = document.getElementById('adminPageContent');
-            container.innerHTML = `
-                <div class="card" style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); border-radius:20px; padding:20px; margin-bottom:25px; border:1px solid rgba(232,185,49,0.08);">
-                    <h3 style="color:#e8b931; margin-bottom:18px; font-size:18px; font-weight:700; display:flex; align-items:center; gap:10px; border-bottom:2px solid rgba(232,185,49,0.1); padding-bottom:10px;"><i class="fas fa-layer-group"></i> إدارة الفصول</h3>
-                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
-                        <button class="btn btn-primary" onclick="showAddClassModal()" style="background:#e8b931; color:#0a1628;">
-                            <i class="fas fa-plus"></i> إضافة فصل
-                        </button>
-                    </div>
-                    <div id="classesList"></div>
-                </div>
-            `;
-            renderClassesList();
-        }
+       function renderAdminClasses() {
+    const container = document.getElementById('adminPageContent');
+    container.innerHTML = `
+        <div style="background:rgba(255,255,255,0.02); border-radius:16px; padding:16px; border:1px solid rgba(232,185,49,0.06);">
+            <h3 style="color:#e8b931; margin-bottom:14px; font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px; border-bottom:2px solid rgba(232,185,49,0.06); padding-bottom:10px;">
+                <i class="fas fa-layer-group"></i> إدارة الفصول
+            </h3>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+                <button class="btn btn-primary" onclick="showAddClassModal()" style="background:#e8b931; color:#0a1628; padding:8px 18px; border:none; border-radius:30px; cursor:pointer; font-family:'Cairo'; font-weight:600; font-size:13px; display:flex; align-items:center; gap:6px;">
+                    <i class="fas fa-plus"></i> إضافة فصل
+                </button>
+            </div>
+            <div id="classesList"></div>
+        </div>
+    `;
+    renderClassesList();
+}
 
         function renderClassesList() {
             const container = document.getElementById('classesList');
@@ -7888,23 +7806,24 @@ function exportHomeworkDetailsToPDF(homeworkId, filter = 'all') {
             showToast('تم حذف الواجب');
         }
 
-        // ==================== ADMIN - RESULTS ====================
-        function renderAdminResults() {
-            const container = document.getElementById('adminPageContent');
-            container.innerHTML = `
-                <div class="card" style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); border-radius:20px; padding:20px; margin-bottom:25px; border:1px solid rgba(232,185,49,0.08);">
-                    <h3 style="color:#e8b931; margin-bottom:18px; font-size:18px; font-weight:700; display:flex; align-items:center; gap:10px; border-bottom:2px solid rgba(232,185,49,0.1); padding-bottom:10px;"><i class="fas fa-chart-bar"></i> النتائج والإحصائيات</h3>
-                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
-                        <select id="resultsClassFilter" onchange="renderResults()" style="padding:10px; border-radius:30px; border:2px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.05); color:white;">
-                            <option value="all">كل الفصول</option>
-                            ${appData.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div id="resultsContainer"></div>
-                </div>
-            `;
-            renderResults();
-        }
+       function renderAdminResults() {
+    const container = document.getElementById('adminPageContent');
+    container.innerHTML = `
+        <div style="background:rgba(255,255,255,0.02); border-radius:16px; padding:16px; border:1px solid rgba(232,185,49,0.06);">
+            <h3 style="color:#e8b931; margin-bottom:14px; font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px; border-bottom:2px solid rgba(232,185,49,0.06); padding-bottom:10px;">
+                <i class="fas fa-chart-bar"></i> النتائج والإحصائيات
+            </h3>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+                <select id="resultsClassFilter" onchange="renderResults()" style="padding:8px 14px; border-radius:30px; border:2px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.02); color:#fff; font-family:'Cairo'; font-size:12px; cursor:pointer; outline:none; min-width:100px;">
+                    <option value="all">كل الفصول</option>
+                    ${appData.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+                </select>
+            </div>
+            <div id="resultsContainer" style="overflow-x:auto;"></div>
+        </div>
+    `;
+    renderResults();
+}
 
         function renderResults() {
             const container = document.getElementById('resultsContainer');
@@ -7964,7 +7883,6 @@ function exportHomeworkDetailsToPDF(homeworkId, filter = 'all') {
     const app = document.getElementById('app');
     const student = currentUser;
 
-    // حساب الإحصائيات
     const totalHomeworks = appData.homeworkForms.filter(h => h.classId === student.classId).length;
     const completedHomeworks = appData.homeworkAnswers.filter(a => a.studentId === student.id).length;
     const pendingHomeworks = appData.homeworkForms.filter(h => 
@@ -7977,26 +7895,19 @@ function exportHomeworkDetailsToPDF(homeworkId, filter = 'all') {
     const totalMeetings = appData.meetings.filter(m => m.classId === student.classId).length;
     const attendedMeetings = appData.meetingAttendance.filter(a => a.studentId === student.id && a.status === 'attended').length;
     
-    // ترتيب الطلاب
     const sortedStudents = [...appData.students].filter(s => s.status === 'active').sort((a, b) => (b.points || 0) - (a.points || 0));
     const studentRank = sortedStudents.findIndex(s => s.id === student.id) + 1;
     
-    // حساب متوسط النتائج
     const answers = appData.homeworkAnswers.filter(a => a.studentId === student.id);
     const avgPercentage = answers.length > 0 
         ? Math.round(answers.reduce((sum, a) => sum + (a.percentage || 0), 0) / answers.length) 
         : 0;
 
     app.innerHTML = `
-        <!-- هامبورجر -->
         <div class="hamburger" id="hamburger" onclick="toggleSidebar()">
             <span></span><span></span><span></span>
         </div>
-        
-        <!-- Sidebar Overlay -->
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
-        
-        <!-- Sidebar -->
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <img src="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png" alt="The Best Academy" class="sidebar-logo">
@@ -8004,169 +7915,236 @@ function exportHomeworkDetailsToPDF(homeworkId, filter = 'all') {
                 <p>طالب | ⭐ ${student.points || 0} نقطة</p>
             </div>
             <ul class="sidebar-menu">
-                <li class="active" data-page="dashboard">
-                    <a onclick="changeStudentPage('dashboard')">
-                        <i class="fas fa-chart-line"></i> لوحة التحكم
-                    </a>
-                </li>
-                <li data-page="homework">
-                    <a onclick="changeStudentPage('homework')">
-                        <i class="fas fa-file-alt"></i> الواجبات
-                    </a>
-                </li>
-                <li data-page="exams">
-    <a onclick="changeStudentPage('exams')">
-        <i class="fas fa-pencil-alt"></i> الاختبارات
-    </a>
-</li>
-                <li data-page="meetings">
-                    <a onclick="changeStudentPage('meetings')">
-                        <i class="fas fa-calendar-alt"></i> الاجتماعات
-                    </a>
-                </li>
-                <li data-page="results">
-                    <a onclick="changeStudentPage('results')">
-                        <i class="fas fa-chart-bar"></i> نتائجي
-                    </a>
-                </li>
-                <li style="margin-top:20px; border-top:1px solid rgba(232,185,49,0.1);">
-                    <a onclick="logout()">
-                        <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
-                    </a>
-                </li>
+                <li class="active" data-page="dashboard"><a onclick="changeStudentPage('dashboard')"><i class="fas fa-chart-line"></i> لوحة التحكم</a></li>
+                <li data-page="homework"><a onclick="changeStudentPage('homework')"><i class="fas fa-file-alt"></i> الواجبات</a></li>
+                <li data-page="exams"><a onclick="changeStudentPage('exams')"><i class="fas fa-pencil-alt"></i> الاختبارات</a></li>
+                <li data-page="meetings"><a onclick="changeStudentPage('meetings')"><i class="fas fa-calendar-alt"></i> الاجتماعات</a></li>
+                <li data-page="results"><a onclick="changeStudentPage('results')"><i class="fas fa-chart-bar"></i> نتائجي</a></li>
+                <li><a onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a></li>
             </ul>
         </div>
 
-        <!-- ====== HEADER - نفس تنسيق المدير بالضبط ====== -->
+        <!-- ===== HEADER ===== -->
         <div style="
             background: rgba(10,22,40,0.95);
             backdrop-filter: blur(10px);
-            padding: 10px 20px;
-            margin-right: 80px;
-            margin-left: 20px;
-            margin-top: 20px;
+            padding: 12px 18px;
+            margin: 12px;
             border-radius: 20px;
-            border: 1px solid rgba(232,185,49,0.1);
+            border: 1px solid rgba(232,185,49,0.12);
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
         ">
-            <div style="display:flex; align-items:center; gap:10px; cursor: pointer;" onclick="renderLandingPage()">
-    <img src="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png" alt="The Best Academy" style="width:40px; height:40px; border-radius:50%; border:2px solid #6C4CE0;">
-    <div>
-        <h1 style="font-size:16px; color:#6C4CE0; margin:0;">The Best <span style="color:#fff;">Academy</span></h1>
-        <p style="font-size:9px; color:rgba(255,255,255,0.3); margin:0;">🏆 Ms: Amira Sobhy</p>
-    </div>
-</div>
-            <div style="display:flex; gap:10px; align-items:center; background:rgba(255,255,255,0.03); padding:5px 12px; border-radius:40px;">
-                <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleTheme()" title="تغيير الوضع" style="width:40px; height:40px; border-radius:50%; border:2px solid #e8b931; background:rgba(255,255,255,0.05); color:#e8b931; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.3s ease; font-size:18px;">
+            <!-- القسم الأيسر: اللوجو -->
+            <div style="
+                display: flex; 
+                align-items: center; 
+                gap: 12px; 
+                cursor: pointer;
+            " onclick="renderLandingPage()">
+                <img src="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png" 
+                     alt="The Best Academy" 
+                     style="
+                         width: 45px; 
+                         height: 45px; 
+                         border-radius: 50%; 
+                         border: 2.5px solid #e8b931;
+                         object-fit: cover;
+                         box-shadow: 0 0 20px rgba(232,185,49,0.15);
+                     ">
+                <div>
+                    <h1 style="
+                        font-size: 18px; 
+                        color: #e8b931; 
+                        margin: 0; 
+                        line-height: 1.2;
+                        font-weight: 800;
+                    ">
+                        The Best 
+                        <span style="color: #fff;">Academy</span>
+                    </h1>
+                    <p style="
+                        font-size: 11px; 
+                        color: rgba(255,255,255,0.35); 
+                        margin: 0; 
+                        line-height: 1.2;
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                    ">
+                        <i class="fas fa-chalkboard-teacher" style="color: #e8b931; font-size: 10px;"></i>
+                        Ms: Amira Sobhy
+                    </p>
+                </div>
+            </div>
+
+            <!-- القسم الأيمن: معلومات الطالب والأزرار -->
+            <div style="
+                display: flex; 
+                gap: 8px; 
+                align-items: center; 
+                background: rgba(255,255,255,0.04); 
+                padding: 6px 14px 6px 10px; 
+                border-radius: 50px; 
+                flex-wrap: wrap;
+                border: 1px solid rgba(232,185,49,0.06);
+            ">
+                <!-- زر الثيم -->
+                <button id="themeToggleBtn" 
+                        onclick="toggleTheme()" 
+                        style="
+                            width: 36px; 
+                            height: 36px; 
+                            border-radius: 50%; 
+                            border: 2px solid #e8b931; 
+                            background: rgba(255,255,255,0.05); 
+                            color: #e8b931; 
+                            cursor: pointer; 
+                            display: flex; 
+                            align-items: center; 
+                            justify-content: center; 
+                            font-size: 15px;
+                            transition: all 0.3s ease;
+                        "
+                        onmouseover="this.style.background='rgba(232,185,49,0.15)'"
+                        onmouseout="this.style.background='rgba(255,255,255,0.05)'">
                     <i class="fas ${document.body.classList.contains('light-mode') ? 'fa-sun' : 'fa-moon'}"></i>
                 </button>
-                <i class="fas fa-user-graduate" style="color:#e8b931;"></i>
-                <span style="color:rgba(255,255,255,0.8);">${escapeHtml(student.name)}</span>
-                <span style="background:#e8b931; color:#0a1628; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:600;">⭐ ${student.points || 0}</span>
-                <button onclick="logout()" style="background:linear-gradient(135deg, #c0392b, #e74c3c); color:white; border:none; padding:5px 12px; border-radius:30px; cursor:pointer; font-size:12px; font-weight:600; display:flex; align-items:center; gap:5px;">
+
+                <!-- أيقونة الطالب -->
+                <i class="fas fa-user-graduate" style="color: #e8b931; font-size: 16px;"></i>
+                
+                <!-- اسم الطالب -->
+                <span style="
+                    color: rgba(255,255,255,0.85); 
+                    font-size: 15px; 
+                    font-weight: 600;
+                ">${escapeHtml(student.name)}</span>
+
+                <!-- نقاط الطالب -->
+                <span style="
+                    background: #e8b931; 
+                    color: #0a1628; 
+                    padding: 3px 12px; 
+                    border-radius: 30px; 
+                    font-size: 13px; 
+                    font-weight: 700;
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                ">
+                    <i class="fas fa-star" style="font-size: 11px;"></i>
+                    ${student.points || 0}
+                </span>
+
+                <!-- زر الخروج -->
+                <button onclick="logout()" 
+                        style="
+                            background: linear-gradient(135deg, #c0392b, #e74c3c); 
+                            color: white; 
+                            border: none; 
+                            padding: 6px 14px; 
+                            border-radius: 30px; 
+                            cursor: pointer; 
+                            font-size: 12px; 
+                            font-weight: 600; 
+                            display: flex; 
+                            align-items: center; 
+                            gap: 5px;
+                            transition: all 0.3s ease;
+                        "
+                        onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 15px rgba(231,76,60,0.3)'"
+                        onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">
                     <i class="fas fa-sign-out-alt"></i> خروج
                 </button>
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div style="margin-right:80px; margin-left:20px; margin-top:20px; padding:15px; min-height:calc(100vh - 140px);">
+        <!-- ===== MAIN CONTENT ===== -->
+        <div style="margin:10px; padding:10px; min-height:calc(100vh - 140px);">
             <div id="studentPageContent">
-                
-                <!-- ====== صف البطاقات العلوي ====== -->
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:15px; margin-bottom:30px;">
-                    
-                    <!-- بطاقة النقاط -->
-                    <div style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); padding:15px; border-radius:20px; text-align:center; border:1px solid rgba(232,185,49,0.08);">
-                        <div style="font-size:28px; margin-bottom:5px;">⭐</div>
-                        <div style="font-size:24px; font-weight:bold; color:#e8b931;">${totalPoints}</div>
-                        <div style="font-size:12px; color:rgba(255,255,255,0.4);">نقاطي</div>
+                <!-- Stats Grid -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:20px;">
+                    <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:14px; text-align:center; border:1px solid rgba(232,185,49,0.06);">
+                        <div style="font-size:22px; margin-bottom:3px;">⭐</div>
+                        <div style="font-size:22px; font-weight:bold; color:#e8b931;">${totalPoints}</div>
+                        <div style="font-size:11px; color:rgba(255,255,255,0.3);">نقاطي</div>
                     </div>
-                    
-                    <!-- بطاقة الترتيب -->
-                    <div style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); padding:15px; border-radius:20px; text-align:center; border:1px solid rgba(52,152,219,0.08);">
-                        <div style="font-size:28px; margin-bottom:5px;">🏆</div>
-                        <div style="font-size:24px; font-weight:bold; color:#3498db;">#${studentRank}</div>
-                        <div style="font-size:12px; color:rgba(255,255,255,0.4);">ترتيبي</div>
+                    <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:14px; text-align:center; border:1px solid rgba(52,152,219,0.06);">
+                        <div style="font-size:22px; margin-bottom:3px;">🏆</div>
+                        <div style="font-size:22px; font-weight:bold; color:#3498db;">#${studentRank}</div>
+                        <div style="font-size:11px; color:rgba(255,255,255,0.3);">ترتيبي</div>
                     </div>
-                    
-                    <!-- بطاقة الواجبات المنجزة -->
-                    <div style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); padding:15px; border-radius:20px; text-align:center; border:1px solid rgba(46,204,113,0.08);">
-                        <div style="font-size:28px; margin-bottom:5px;">✅</div>
-                        <div style="font-size:24px; font-weight:bold; color:#2ecc71;">${completedHomeworks}</div>
-                        <div style="font-size:12px; color:rgba(255,255,255,0.4);">واجبات منجزة</div>
+                    <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:14px; text-align:center; border:1px solid rgba(46,204,113,0.06);">
+                        <div style="font-size:22px; margin-bottom:3px;">✅</div>
+                        <div style="font-size:22px; font-weight:bold; color:#2ecc71;">${completedHomeworks}</div>
+                        <div style="font-size:11px; color:rgba(255,255,255,0.3);">واجبات منجزة</div>
                     </div>
-                    
-                    <!-- بطاقة الواجبات الجديدة -->
-                    <div style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); padding:15px; border-radius:20px; text-align:center; border:1px solid rgba(243,156,18,0.08);">
-                        <div style="font-size:28px; margin-bottom:5px;">⏳</div>
-                        <div style="font-size:24px; font-weight:bold; color:#f39c12;">${pendingHomeworks}</div>
-                        <div style="font-size:12px; color:rgba(255,255,255,0.4);">واجبات جديدة</div>
+                    <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:14px; text-align:center; border:1px solid rgba(243,156,18,0.06);">
+                        <div style="font-size:22px; margin-bottom:3px;">⏳</div>
+                        <div style="font-size:22px; font-weight:bold; color:#f39c12;">${pendingHomeworks}</div>
+                        <div style="font-size:11px; color:rgba(255,255,255,0.3);">واجبات جديدة</div>
                     </div>
-                    
-                    <!-- بطاقة متوسط النتائج -->
-                    <div style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); padding:15px; border-radius:20px; text-align:center; border:1px solid rgba(155,89,182,0.08);">
-                        <div style="font-size:28px; margin-bottom:5px;">📊</div>
-                        <div style="font-size:24px; font-weight:bold; color:#9b59b6;">${avgPercentage}%</div>
-                        <div style="font-size:12px; color:rgba(255,255,255,0.4);">متوسط النتائج</div>
+                    <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:14px; text-align:center; border:1px solid rgba(155,89,182,0.06);">
+                        <div style="font-size:22px; margin-bottom:3px;">📊</div>
+                        <div style="font-size:22px; font-weight:bold; color:#9b59b6;">${avgPercentage}%</div>
+                        <div style="font-size:11px; color:rgba(255,255,255,0.3);">متوسط النتائج</div>
                     </div>
-                    
-                    <!-- بطاقة الاجتماعات -->
-                    <div style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); padding:15px; border-radius:20px; text-align:center; border:1px solid rgba(231,76,60,0.08);">
-                        <div style="font-size:28px; margin-bottom:5px;">📅</div>
-                        <div style="font-size:24px; font-weight:bold; color:#e74c3c;">${attendedMeetings}/${totalMeetings}</div>
-                        <div style="font-size:12px; color:rgba(255,255,255,0.4);">الاجتماعات</div>
+                    <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:14px; text-align:center; border:1px solid rgba(231,76,60,0.06);">
+                        <div style="font-size:22px; margin-bottom:3px;">📅</div>
+                        <div style="font-size:22px; font-weight:bold; color:#e74c3c;">${attendedMeetings}/${totalMeetings}</div>
+                        <div style="font-size:11px; color:rgba(255,255,255,0.3);">الاجتماعات</div>
                     </div>
                 </div>
 
-                <!-- ====== بطاقة المعلومات الشخصية ====== -->
-                <div style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); border-radius:20px; padding:20px; margin-bottom:25px; border:1px solid rgba(232,185,49,0.08);">
-                    <h3 style="color:#e8b931; margin-bottom:18px; font-size:18px; font-weight:700; display:flex; align-items:center; gap:10px; border-bottom:2px solid rgba(232,185,49,0.1); padding-bottom:10px;">
+                <!-- Personal Info -->
+                <div style="background:rgba(255,255,255,0.02); border-radius:16px; padding:16px; margin-bottom:20px; border:1px solid rgba(232,185,49,0.06);">
+                    <h3 style="color:#e8b931; margin-bottom:14px; font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px; border-bottom:2px solid rgba(232,185,49,0.06); padding-bottom:10px;">
                         <i class="fas fa-id-card"></i> معلوماتي الشخصية
                     </h3>
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
-                        <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
-                            <div style="font-size:11px; color:rgba(255,255,255,0.3);">الاسم الكامل</div>
-                            <div style="font-size:15px; font-weight:600; color:rgba(255,255,255,0.9);">${escapeHtml(student.name)}</div>
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:10px;">
+                        <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.04);">
+                            <div style="font-size:10px; color:rgba(255,255,255,0.25);">الاسم الكامل</div>
+                            <div style="font-size:14px; font-weight:600; color:rgba(255,255,255,0.85);">${escapeHtml(student.name)}</div>
                         </div>
-                        <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
-                            <div style="font-size:11px; color:rgba(255,255,255,0.3);">الفصل</div>
-                            <div style="font-size:15px; font-weight:600; color:rgba(255,255,255,0.9);">${student.className || '-'}</div>
+                        <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.04);">
+                            <div style="font-size:10px; color:rgba(255,255,255,0.25);">الفصل</div>
+                            <div style="font-size:14px; font-weight:600; color:rgba(255,255,255,0.85);">${student.className || '-'}</div>
                         </div>
-                        <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
-                            <div style="font-size:11px; color:rgba(255,255,255,0.3);">اسم المستخدم</div>
-                            <div style="font-size:15px; font-weight:600; color:rgba(255,255,255,0.9);">${student.username}</div>
+                        <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.04);">
+                            <div style="font-size:10px; color:rgba(255,255,255,0.25);">اسم المستخدم</div>
+                            <div style="font-size:14px; font-weight:600; color:rgba(255,255,255,0.85);">${student.username}</div>
                         </div>
-                        <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
-                            <div style="font-size:11px; color:rgba(255,255,255,0.3);">⭐ النقاط</div>
-                            <div style="font-size:15px; font-weight:600; color:#e8b931;">${student.points || 0} نقطة</div>
+                        <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.04);">
+                            <div style="font-size:10px; color:rgba(255,255,255,0.25);">⭐ النقاط</div>
+                            <div style="font-size:14px; font-weight:600; color:#e8b931;">${student.points || 0} نقطة</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ====== بطاقة ترتيب الطلاب ====== -->
-                <div style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); border-radius:20px; padding:20px; margin-bottom:25px; border:1px solid rgba(232,185,49,0.08);">
-                    <h3 style="color:#e8b931; margin-bottom:18px; font-size:18px; font-weight:700; display:flex; align-items:center; gap:10px; border-bottom:2px solid rgba(232,185,49,0.1); padding-bottom:10px;">
+                <!-- Ranking -->
+                <div style="background:rgba(255,255,255,0.02); border-radius:16px; padding:16px; margin-bottom:20px; border:1px solid rgba(232,185,49,0.06);">
+                    <h3 style="color:#e8b931; margin-bottom:14px; font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px; border-bottom:2px solid rgba(232,185,49,0.06); padding-bottom:10px;">
                         <i class="fas fa-trophy"></i> ترتيبي بين الطلاب
                     </h3>
                     <div id="studentRankingContainer"></div>
                 </div>
 
-                <!-- ====== بطاقة الواجبات الأخيرة ====== -->
-                <div style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); border-radius:20px; padding:20px; margin-bottom:25px; border:1px solid rgba(232,185,49,0.08);">
-                    <h3 style="color:#e8b931; margin-bottom:18px; font-size:18px; font-weight:700; display:flex; align-items:center; gap:10px; border-bottom:2px solid rgba(232,185,49,0.1); padding-bottom:10px;">
+                <!-- Recent Homeworks -->
+                <div style="background:rgba(255,255,255,0.02); border-radius:16px; padding:16px; margin-bottom:20px; border:1px solid rgba(232,185,49,0.06);">
+                    <h3 style="color:#e8b931; margin-bottom:14px; font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px; border-bottom:2px solid rgba(232,185,49,0.06); padding-bottom:10px;">
                         <i class="fas fa-clock"></i> أحدث الواجبات
                     </h3>
                     <div id="studentRecentHomeworks"></div>
                 </div>
 
-                <!-- ====== بطاقة الاجتماعات القادمة ====== -->
-                <div style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); border-radius:20px; padding:20px; margin-bottom:25px; border:1px solid rgba(232,185,49,0.08);">
-                    <h3 style="color:#e8b931; margin-bottom:18px; font-size:18px; font-weight:700; display:flex; align-items:center; gap:10px; border-bottom:2px solid rgba(232,185,49,0.1); padding-bottom:10px;">
+                <!-- Upcoming Meetings -->
+                <div style="background:rgba(255,255,255,0.02); border-radius:16px; padding:16px; margin-bottom:20px; border:1px solid rgba(232,185,49,0.06);">
+                    <h3 style="color:#e8b931; margin-bottom:14px; font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px; border-bottom:2px solid rgba(232,185,49,0.06); padding-bottom:10px;">
                         <i class="fas fa-calendar-alt"></i> الاجتماعات القادمة
                     </h3>
                     <div id="studentUpcomingMeetings"></div>
@@ -8174,23 +8152,15 @@ function exportHomeworkDetailsToPDF(homeworkId, filter = 'all') {
             </div>
         </div>
 
-        <div style="background:rgba(10,22,40,0.95); color:rgba(255,255,255,0.3); padding:15px; text-align:center; margin-top:30px; border-top:1px solid rgba(232,185,49,0.05);">
-            <p>© 2025 <span style="color:#e8b931;">The Best Academy</span> | Ms: Amira Sobhy | جميع الحقوق محفوظة</p>
+        <div class="footer" style="background:rgba(10,22,40,0.95); color:rgba(255,255,255,0.2); padding:12px; text-align:center; margin-top:20px; border-top:1px solid rgba(232,185,49,0.04); font-size:12px;">
+            <p>© 2025 <span style="color:#e8b931;">The Best Academy</span> | Ms: Amira Sobhy</p>
         </div>
     `;
 
-    // عرض الترتيب
     renderStudentRankingList();
-    
-    // عرض الواجبات الأخيرة
     renderStudentRecentHomeworks();
-    
     renderStudentClassRanking();
-
-
-    // عرض الاجتماعات القادمة
     renderStudentUpcomingMeetings();
-    
     initTheme();
 }
 
@@ -8599,7 +8569,7 @@ function renderStudentUpcomingMeetings() {
     closeSidebar();
 }
 
-  function renderStudentHomeworks() {
+ function renderStudentHomeworks() {
     const container = document.getElementById('studentPageContent');
     if (!container) return;
 
@@ -8613,44 +8583,46 @@ function renderStudentUpcomingMeetings() {
     const completedHomeworks = appData.homeworkAnswers.filter(a => a.studentId === student.id);
 
     container.innerHTML = `
-        <div class="card" style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); border-radius:20px; padding:20px; margin-bottom:25px; border:1px solid rgba(232,185,49,0.08);">
-            <h3 style="color:#e8b931; margin-bottom:18px; font-size:18px; font-weight:700; display:flex; align-items:center; gap:10px; border-bottom:2px solid rgba(232,185,49,0.1); padding-bottom:10px;"><i class="fas fa-file-alt"></i> الواجبات</h3>
+        <div style="background:rgba(255,255,255,0.02); border-radius:16px; padding:16px; border:1px solid rgba(232,185,49,0.06);">
+            <h3 style="color:#e8b931; margin-bottom:14px; font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px; border-bottom:2px solid rgba(232,185,49,0.06); padding-bottom:10px;">
+                <i class="fas fa-file-alt"></i> الواجبات
+            </h3>
             
             ${availableHomeworks.length > 0 ? `
-                <h4 style="color:#f39c12; margin:15px 0 10px;">📝 واجبات جديدة</h4>
+                <h4 style="color:#f39c12; margin:10px 0 8px; font-size:15px;">📝 واجبات جديدة</h4>
                 ${availableHomeworks.map(hw => `
-                    <div style="background:rgba(243,156,18,0.05); border-radius:15px; padding:15px; margin-bottom:15px; border-right:4px solid #f39c12;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+                    <div style="background:rgba(243,156,18,0.04); border-radius:12px; padding:12px; margin-bottom:10px; border-right:3px solid #f39c12;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                             <div>
-                                <strong style="color:#e8b931;">${escapeHtml(hw.title)}</strong>
+                                <strong style="color:#e8b931; font-size:15px;">${escapeHtml(hw.title)}</strong>
                                 <br>
-                                <small style="color:rgba(255,255,255,0.3);">❓ ${hw.questions.length} أسئلة</small>
+                                <small style="color:rgba(255,255,255,0.25); font-size:12px;">❓ ${hw.questions.length} أسئلة</small>
                                 <br>
-                                <small style="color:rgba(255,255,255,0.3);">📅 ينتهي: ${new Date(hw.deadline).toLocaleString('ar-EG')}</small>
+                                <small style="color:rgba(255,255,255,0.25); font-size:12px;">📅 ينتهي: ${new Date(hw.deadline).toLocaleString('ar-EG')}</small>
                             </div>
-                            <button class="btn btn-primary" onclick="startHomework(${hw.id})" style="margin-top:10px; background:#e8b931; color:#0a1628; padding:8px 20px; border:none; border-radius:30px; cursor:pointer; font-family:'Cairo'; font-weight:600;">
-                                <i class="fas fa-play"></i> حل الواجب
+                            <button onclick="startHomework(${hw.id})" style="background:#e8b931; color:#0a1628; padding:6px 16px; border:none; border-radius:30px; cursor:pointer; font-family:'Cairo'; font-weight:600; font-size:13px;">
+                                <i class="fas fa-play"></i> حل
                             </button>
                         </div>
                     </div>
                 `).join('')}
-            ` : '<p style="color:rgba(255,255,255,0.3); padding:20px;">🎉 لا توجد واجبات جديدة</p>'}
+            ` : '<p style="color:rgba(255,255,255,0.25); padding:10px 0; font-size:14px;">🎉 لا توجد واجبات جديدة</p>'}
 
             ${completedHomeworks.length > 0 ? `
-                <h4 style="color:#2ecc71; margin:15px 0 10px;">✅ الواجبات المكتملة</h4>
+                <h4 style="color:#2ecc71; margin:12px 0 8px; font-size:15px;">✅ الواجبات المكتملة</h4>
                 ${completedHomeworks.map(ans => {
                     const hw = appData.homeworkForms.find(h => h.id === ans.homeworkId);
                     if (!hw) return '';
                     return `
-                        <div style="background:rgba(46,204,113,0.05); border-radius:15px; padding:15px; margin-bottom:15px; border-right:4px solid #2ecc71;">
+                        <div style="background:rgba(46,204,113,0.03); border-radius:12px; padding:12px; margin-bottom:10px; border-right:3px solid #2ecc71;">
                             <div>
-                                <strong style="color:#e8b931;">${escapeHtml(hw.title)}</strong>
+                                <strong style="color:#e8b931; font-size:15px;">${escapeHtml(hw.title)}</strong>
                                 <br>
-                                <small style="color:rgba(255,255,255,0.3);">📅 تم الحل: ${new Date(ans.submittedAt).toLocaleString('ar-EG')}</small>
+                                <small style="color:rgba(255,255,255,0.25); font-size:12px;">📅 ${new Date(ans.submittedAt).toLocaleString('ar-EG')}</small>
                                 <br>
-                                <small style="color:rgba(255,255,255,0.3);">⭐ النقاط: <strong style="color:#e8b931;">${ans.earnedPoints || 0}</strong></small>
+                                <small style="color:rgba(255,255,255,0.25); font-size:12px;">⭐ <strong style="color:#e8b931;">${ans.earnedPoints || 0}</strong></small>
                                 <br>
-                                <small style="color:rgba(255,255,255,0.3);">📊 النتيجة: ${ans.percentage || 0}% (${ans.correctAnswers || 0}/${ans.totalQuestions || 0})</small>
+                                <small style="color:rgba(255,255,255,0.25); font-size:12px;">📊 ${ans.percentage || 0}% (${ans.correctAnswers || 0}/${ans.totalQuestions || 0})</small>
                             </div>
                         </div>
                     `;
