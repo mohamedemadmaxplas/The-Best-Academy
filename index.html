@@ -17,9 +17,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <!-- Favicon -->
-<link rel="icon" type="image/png" href="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png">
-<link rel="shortcut icon" type="image/png" href="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png">
-<link rel="apple-touch-icon" href="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png">
+    <link rel="icon" type="image/png" href="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png">
+    <link rel="shortcut icon" type="image/png" href="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png">
+    <link rel="apple-touch-icon" href="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png">
 
     <style>
         /* ==================== RESET & GLOBAL ==================== */
@@ -3949,7 +3949,7 @@ function renderLoginPage() {
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const username = document.getElementById('loginUsername').value.trim().replace(/\s+/g, ' ');
+        const username = document.getElementById('loginUsername').value.replace(/\s/g, '');
         const password = document.getElementById('loginPassword').value.trim();
 
         // ========== ADMIN LOGIN ==========
@@ -3962,7 +3962,7 @@ function renderLoginPage() {
         }
 
         // ========== STUDENT LOGIN ==========
-        const student = appData.students.find(s => s.username === username && s.password === password);
+        const student = appData.students.find(s => s.username.replace(/\s/g, '') === username && s.password === password);
         
         if (student) {
             // ====== التحقق من حالة الطالب ======
@@ -4047,8 +4047,8 @@ function renderLoginPage() {
 
             document.getElementById('joinRequestForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const username = document.getElementById('joinUsername').value.trim().replace(/\s+/g, ' ');
-                if (appData.students.some(s => s.username === username)) {
+                const username = document.getElementById('joinUsername').value.replace(/\s/g, '');
+                if (appData.students.some(s => s.username.replace(/\s/g, '') === username)) {
                     showToast('اسم المستخدم موجود مسبقاً', 'error');
                     return;
                 }
@@ -6567,8 +6567,8 @@ function exportStudentsToPDF() {
             document.getElementById('addStudentForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
-                const username = document.getElementById('studentUsername').value.trim().replace(/\s+/g, ' ');
-                if (appData.students.some(s => s.username === username)) {
+                const username = document.getElementById('studentUsername').value.replace(/\s/g, '');
+                if (appData.students.some(s => s.username.replace(/\s/g, '') === username)) {
                     showToast('اسم المستخدم موجود مسبقاً', 'error');
                     return;
                 }
