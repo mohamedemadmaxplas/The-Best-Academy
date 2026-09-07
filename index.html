@@ -6051,29 +6051,584 @@ function exportExamDetailsToPDF(examId) {
 }
 
 
-     function renderAdminStudents() {
+   // ==================== ADMIN - STUDENTS (نسخة مطورة كاملة) ====================
+function renderAdminStudents() {
     const container = document.getElementById('adminPageContent');
+    
+    // حساب الإحصائيات
+    const totalStudents = appData.students.filter(s => s.status !== 'pending').length;
+    const activeStudents = appData.students.filter(s => s.status === 'active').length;
+    const pendingStudents = appData.students.filter(s => s.status === 'pending').length;
+    const totalPoints = appData.students.reduce((sum, s) => sum + (s.points || 0), 0);
+
     container.innerHTML = `
-        <div class="card" style="background:rgba(255,255,255,0.03); backdrop-filter:blur(10px); border-radius:20px; padding:20px; margin-bottom:25px; border:1px solid rgba(232,185,49,0.08);">
-            <h3 style="color:#e8b931; margin-bottom:18px; font-size:18px; font-weight:700; display:flex; align-items:center; gap:10px; border-bottom:2px solid rgba(232,185,49,0.1); padding-bottom:10px;"><i class="fas fa-user-graduate"></i> إدارة الطلاب</h3>
-            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
-                <button class="btn btn-primary" onclick="showAddStudentModal()" style="background:#e8b931; color:#0a1628;">
-                    <i class="fas fa-plus"></i> إضافة طالب
+        <div style="
+            background: rgba(255,255,255,0.02);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 25px;
+            border: 1px solid rgba(232,185,49,0.06);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        ">
+            <!-- ===== الهيدر ===== -->
+            <div style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 15px;
+                margin-bottom: 20px;
+                border-bottom: 2px solid rgba(232,185,49,0.06);
+                padding-bottom: 18px;
+            ">
+                <div>
+                    <h3 style="
+                        color: #e8b931;
+                        font-size: 24px;
+                        font-weight: 800;
+                        margin: 0;
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                    ">
+                        <i class="fas fa-user-graduate" style="color: #e8b931;"></i>
+                        إدارة الطلاب
+                        <span id="studentsCountBadge" style="
+                            background: rgba(232,185,49,0.12);
+                            color: #e8b931;
+                            font-size: 13px;
+                            padding: 2px 14px;
+                            border-radius: 20px;
+                            font-weight: 700;
+                        ">${totalStudents}</span>
+                    </h3>
+                    <p style="color: rgba(255,255,255,0.25); font-size: 13px; margin: 4px 0 0;">
+                        <i class="fas fa-info-circle"></i> إدارة بيانات الطلاب وإرسال رسائل الترحيب
+                    </p>
+                </div>
+                <button class="btn btn-primary" onclick="showAddStudentModal()" style="
+                    background: linear-gradient(135deg, #e8b931, #d4a017);
+                    color: #0a1628;
+                    padding: 10px 26px;
+                    border: none;
+                    border-radius: 30px;
+                    cursor: pointer;
+                    font-family: 'Cairo', sans-serif;
+                    font-weight: 700;
+                    font-size: 14px;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 15px rgba(232,185,49,0.2);
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                " onmouseover="this.style.transform='translateY(-2px) scale(1.02)'; this.style.boxShadow='0 6px 25px rgba(232,185,49,0.35)'" 
+                onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 4px 15px rgba(232,185,49,0.2)'">
+                    <i class="fas fa-plus-circle"></i> إضافة طالب
                 </button>
-                <input type="text" id="studentSearch" placeholder="🔍 بحث..." oninput="filterStudents()" style="flex:1; padding:10px; border-radius:30px; border:2px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.05); color:white;">
-                <select id="classFilterStudents" onchange="filterStudents()" style="padding:10px; border-radius:30px; border:2px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.05); color:white;">
-                    <option value="all">كل الفصول</option>
-                    ${appData.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
-                </select>
-                <select id="statusFilterStudents" onchange="filterStudents()" style="padding:10px; border-radius:30px; border:2px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.05); color:white;">
-                    <option value="all">الكل</option>
-                    <option value="active">✅ نشط</option>
-                </select>
             </div>
-            <div id="studentsTable"></div>
+
+            <!-- ===== بطاقات الإحصائيات ===== -->
+            <div style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 12px;
+                margin-bottom: 20px;
+            ">
+                <div style="
+                    background: rgba(255,255,255,0.03);
+                    border-radius: 14px;
+                    padding: 14px;
+                    text-align: center;
+                    border: 1px solid rgba(232,185,49,0.06);
+                ">
+                    <div style="font-size: 28px; font-weight: 700; color: #e8b931;">${totalStudents}</div>
+                    <div style="font-size: 12px; color: rgba(255,255,255,0.3);">👨‍🎓 إجمالي الطلاب</div>
+                </div>
+                <div style="
+                    background: rgba(46,204,113,0.04);
+                    border-radius: 14px;
+                    padding: 14px;
+                    text-align: center;
+                    border: 1px solid rgba(46,204,113,0.08);
+                ">
+                    <div style="font-size: 28px; font-weight: 700; color: #2ecc71;">${activeStudents}</div>
+                    <div style="font-size: 12px; color: rgba(255,255,255,0.3);">✅ نشط</div>
+                </div>
+                <div style="
+                    background: rgba(243,156,18,0.04);
+                    border-radius: 14px;
+                    padding: 14px;
+                    text-align: center;
+                    border: 1px solid rgba(243,156,18,0.08);
+                ">
+                    <div style="font-size: 28px; font-weight: 700; color: #f39c12;">${pendingStudents}</div>
+                    <div style="font-size: 12px; color: rgba(255,255,255,0.3);">⏳ بانتظار الموافقة</div>
+                </div>
+                <div style="
+                    background: rgba(155,89,182,0.04);
+                    border-radius: 14px;
+                    padding: 14px;
+                    text-align: center;
+                    border: 1px solid rgba(155,89,182,0.08);
+                ">
+                    <div style="font-size: 28px; font-weight: 700; color: #9b59b6;">${totalPoints}</div>
+                    <div style="font-size: 12px; color: rgba(255,255,255,0.3);">⭐ إجمالي النقاط</div>
+                </div>
+            </div>
+
+            <!-- ===== أدوات البحث والفلتر ===== -->
+            <div style="
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+                margin-bottom: 20px;
+                background: rgba(255,255,255,0.02);
+                padding: 14px 16px;
+                border-radius: 16px;
+                border: 1px solid rgba(255,255,255,0.03);
+            ">
+                <!-- حقل البحث -->
+                <div style="flex: 2; min-width: 200px; position: relative;">
+                    <div style="position: relative;">
+                        <i class="fas fa-search" style="
+                            position: absolute;
+                            right: 16px;
+                            top: 50%;
+                            transform: translateY(-50%);
+                            color: rgba(255,255,255,0.15);
+                            font-size: 15px;
+                        "></i>
+                        <input type="text" 
+                               id="studentSearch" 
+                               placeholder="🔍 ابحث بالاسم أو اسم المستخدم..." 
+                               oninput="filterStudentsWithSuggestions()"
+                               onfocus="showSuggestions()"
+                               onblur="setTimeout(hideSuggestions, 250)"
+                               style="
+                                   width: 100%;
+                                   padding: 10px 45px 10px 16px;
+                                   border-radius: 30px;
+                                   border: 2px solid rgba(255,255,255,0.05);
+                                   background: rgba(255,255,255,0.03);
+                                   color: #fff;
+                                   font-family: 'Cairo', sans-serif;
+                                   font-size: 14px;
+                                   transition: all 0.3s ease;
+                                   outline: none;
+                               "
+                               onfocus="this.style.borderColor='#e8b931'; this.style.boxShadow='0 0 0 4px rgba(232,185,49,0.06)'"
+                               onblur="this.style.borderColor='rgba(255,255,255,0.05)'; this.style.boxShadow='none'">
+                    </div>
+                    <!-- صندوق الاقتراحات -->
+                    <div id="suggestionsBox" style="
+                        position: absolute;
+                        top: calc(100% + 6px);
+                        right: 0;
+                        left: 0;
+                        background: #0d1a2e;
+                        border-radius: 14px;
+                        border: 1px solid rgba(232,185,49,0.08);
+                        box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+                        max-height: 200px;
+                        overflow-y: auto;
+                        display: none;
+                        z-index: 100;
+                        padding: 6px 0;
+                    "></div>
+                </div>
+
+                <!-- فلتر الفصل -->
+                <select id="classFilterStudents" onchange="filterStudentsWithSuggestions()" style="
+                    padding: 10px 18px;
+                    border-radius: 30px;
+                    border: 2px solid rgba(255,255,255,0.05);
+                    background: rgba(255,255,255,0.03);
+                    color: #fff;
+                    font-family: 'Cairo', sans-serif;
+                    font-size: 13px;
+                    cursor: pointer;
+                    outline: none;
+                    min-width: 120px;
+                " onfocus="this.style.borderColor='#e8b931'" onblur="this.style.borderColor='rgba(255,255,255,0.05)'">
+                    <option value="all">📚 كل الفصول</option>
+                    ${appData.classes.map(c => `<option value="${c.id}" style="background:#0d1a2e;">${c.name}</option>`).join('')}
+                </select>
+
+                <!-- فلتر الحالة -->
+                <select id="statusFilterStudents" onchange="filterStudentsWithSuggestions()" style="
+                    padding: 10px 18px;
+                    border-radius: 30px;
+                    border: 2px solid rgba(255,255,255,0.05);
+                    background: rgba(255,255,255,0.03);
+                    color: #fff;
+                    font-family: 'Cairo', sans-serif;
+                    font-size: 13px;
+                    cursor: pointer;
+                    outline: none;
+                    min-width: 120px;
+                " onfocus="this.style.borderColor='#e8b931'" onblur="this.style.borderColor='rgba(255,255,255,0.05)'">
+                    <option value="all">👤 الكل</option>
+                    <option value="active" style="background:#0d1a2e;">✅ نشط</option>
+                    <option value="pending" style="background:#0d1a2e;">⏳ بانتظار الموافقة</option>
+                </select>
+
+                <!-- زر تصدير PDF -->
+                <button onclick="exportStudentsToPDF()" style="
+                    background: linear-gradient(135deg, #e74c3c, #c0392b);
+                    color: white;
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 30px;
+                    cursor: pointer;
+                    font-family: 'Cairo', sans-serif;
+                    font-weight: 600;
+                    font-size: 13px;
+                    transition: all 0.3s ease;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    box-shadow: 0 4px 12px rgba(231,76,60,0.2);
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(231,76,60,0.3)'" 
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(231,76,60,0.2)'">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </button>
+            </div>
+
+            <!-- ===== جدول الطلاب ===== -->
+            <div id="studentsTable" style="overflow-x: auto;"></div>
         </div>
     `;
-    renderStudentsTable();
+
+    // عرض الجدول
+    renderStudentsTableWithSuggestions();
+}
+
+function renderStudentsTableWithSuggestions() {
+    const container = document.getElementById('studentsTable');
+    if (!container) return;
+
+    const search = document.getElementById('studentSearch')?.value?.toLowerCase()?.trim() || '';
+    const classFilter = document.getElementById('classFilterStudents')?.value || 'all';
+    const statusFilter = document.getElementById('statusFilterStudents')?.value || 'all';
+    
+    let filtered = appData.students.filter(s => {
+        // البحث بالاسم أو اسم المستخدم
+        const matchName = s.name.toLowerCase().includes(search);
+        const matchUsername = s.username.toLowerCase().includes(search);
+        const matchSearch = matchName || matchUsername;
+        
+        // فلتر الفصل
+        const matchClass = classFilter === 'all' || s.classId == classFilter;
+        
+        // فلتر الحالة
+        const matchStatus = statusFilter === 'all' || s.status === statusFilter;
+        
+        return matchSearch && matchClass && matchStatus;
+    });
+
+    // تحديث عدد الطلاب
+    const badge = document.getElementById('studentsCountBadge');
+    if (badge) badge.textContent = filtered.length;
+
+    // تحديث صندوق الاقتراحات
+    updateSuggestions(search);
+
+    if (filtered.length === 0) {
+        container.innerHTML = `
+            <div style="
+                text-align: center;
+                padding: 50px 20px;
+                color: rgba(255,255,255,0.2);
+            ">
+                <i class="fas fa-users-slash" style="font-size: 48px; display: block; margin-bottom: 15px; color: rgba(255,255,255,0.05);"></i>
+                <p style="font-size: 16px;">لا يوجد طلاب مطابقين للبحث</p>
+                <p style="font-size: 13px; color: rgba(255,255,255,0.15);">جرب تغيير كلمات البحث أو الفلاتر</p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = `
+        <table style="
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            border-radius: 16px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.02);
+        ">
+            <thead>
+                <tr style="
+                    background: rgba(232,185,49,0.04);
+                    border-bottom: 2px solid rgba(232,185,49,0.06);
+                ">
+                    <th style="padding: 14px 12px; text-align: right; color: rgba(255,255,255,0.5); font-weight: 600; font-size: 13px;">#</th>
+                    <th style="padding: 14px 12px; text-align: right; color: rgba(255,255,255,0.5); font-weight: 600; font-size: 13px;">الاسم</th>
+                    <th style="padding: 14px 12px; text-align: right; color: rgba(255,255,255,0.5); font-weight: 600; font-size: 13px;">الفصل</th>
+                    <th style="padding: 14px 12px; text-align: right; color: rgba(255,255,255,0.5); font-weight: 600; font-size: 13px;">اسم المستخدم</th>
+                    <th style="padding: 14px 12px; text-align: center; color: rgba(255,255,255,0.5); font-weight: 600; font-size: 13px;">⭐ النقاط</th>
+                    <th style="padding: 14px 12px; text-align: center; color: rgba(255,255,255,0.5); font-weight: 600; font-size: 13px;">الحالة</th>
+                    <th style="padding: 14px 12px; text-align: center; color: rgba(255,255,255,0.5); font-weight: 600; font-size: 13px;">الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    filtered.forEach((student, idx) => {
+        const cls = appData.classes.find(c => c.id === student.classId);
+        const statusColors = {
+            active: '#2ecc71',
+            pending: '#f39c12',
+            rejected: '#e74c3c'
+        };
+        const statusTexts = {
+            active: '✅ نشط',
+            pending: '⏳ بانتظار الموافقة',
+            rejected: '❌ مرفوض'
+        };
+        const statusColor = statusColors[student.status] || '#95a5a6';
+        const statusText = statusTexts[student.status] || student.status;
+
+        // رقم سري للباسورد
+        const passwordId = `pass_${student.id}`;
+
+        html += `
+            <tr style="
+                border-bottom: 1px solid rgba(255,255,255,0.02);
+                transition: all 0.2s ease;
+            " onmouseover="this.style.background='rgba(255,255,255,0.02)'" 
+               onmouseout="this.style.background='transparent'">
+                <td style="padding: 12px; color: rgba(255,255,255,0.2); font-size: 13px;">${idx + 1}</td>
+                <td style="padding: 12px;">
+                    <strong style="color: rgba(255,255,255,0.85);">${escapeHtml(student.name)}</strong>
+                    <br>
+                    <small style="color: rgba(255,255,255,0.15); font-size: 11px;">📱 ${student.phone || 'لا يوجد'}</small>
+                </td>
+                <td style="padding: 12px; color: rgba(255,255,255,0.4); font-size: 13px;">
+                    <span style="
+                        background: rgba(232,185,49,0.06);
+                        padding: 2px 12px;
+                        border-radius: 12px;
+                        color: #e8b931;
+                        font-size: 12px;
+                    ">${cls?.name || '-'}</span>
+                </td>
+                <td style="padding: 12px;">
+                    <span style="color: rgba(255,255,255,0.5); font-size: 13px;">${student.username}</span>
+                    <br>
+                    <span id="${passwordId}" style="
+                        font-family: monospace;
+                        font-size: 12px;
+                        color: #e8b931;
+                        background: rgba(232,185,49,0.04);
+                        padding: 1px 10px;
+                        border-radius: 10px;
+                        display: inline-block;
+                    ">${student.password}</span>
+                    <button onclick="togglePasswordVisibility('${passwordId}', this)" style="
+                        background: transparent;
+                        border: none;
+                        color: rgba(255,255,255,0.15);
+                        cursor: pointer;
+                        font-size: 12px;
+                        padding: 2px 6px;
+                        transition: 0.3s;
+                    " onmouseover="this.style.color='#e8b931'" onmouseout="this.style.color='rgba(255,255,255,0.15)'">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </td>
+                <td style="padding: 12px; text-align: center;">
+                    <span style="
+                        color: #e8b931;
+                        font-weight: 700;
+                        font-size: 18px;
+                    ">${student.points || 0}</span>
+                </td>
+                <td style="padding: 12px; text-align: center;">
+                    <span style="
+                        background: ${statusColor}15;
+                        color: ${statusColor};
+                        padding: 3px 14px;
+                        border-radius: 20px;
+                        font-size: 12px;
+                        font-weight: 600;
+                    ">${statusText}</span>
+                </td>
+                <td style="padding: 12px; text-align: center;">
+                    <div style="display: flex; gap: 4px; flex-wrap: wrap; justify-content: center;">
+                        <button onclick="showEditStudentModal(${student.id})" 
+                                style="
+                                    background: rgba(52,152,219,0.12);
+                                    color: #3498db;
+                                    padding: 4px 10px;
+                                    border: none;
+                                    border-radius: 16px;
+                                    cursor: pointer;
+                                    font-family: 'Cairo', sans-serif;
+                                    font-weight: 600;
+                                    font-size: 11px;
+                                    transition: all 0.2s ease;
+                                "
+                                onmouseover="this.style.background='rgba(52,152,219,0.25)'; this.style.transform='scale(1.05)'" 
+                                onmouseout="this.style.background='rgba(52,152,219,0.12)'; this.style.transform='scale(1)'"
+                                title="تعديل بيانات الطالب">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        
+                        <button onclick="openWhatsApp(${student.id})" 
+                                style="
+                                    background: rgba(37,211,102,0.12);
+                                    color: #25D366;
+                                    padding: 4px 10px;
+                                    border: none;
+                                    border-radius: 16px;
+                                    cursor: pointer;
+                                    font-family: 'Cairo', sans-serif;
+                                    font-weight: 600;
+                                    font-size: 11px;
+                                    transition: all 0.2s ease;
+                                "
+                                onmouseover="this.style.background='rgba(37,211,102,0.25)'; this.style.transform='scale(1.05)'" 
+                                onmouseout="this.style.background='rgba(37,211,102,0.12)'; this.style.transform='scale(1)'"
+                                title="فتح محادثة واتساب">
+                            <i class="fab fa-whatsapp"></i>
+                        </button>
+                        
+                        <button onclick="sendWhatsApp(${student.id})" 
+                                style="
+                                    background: rgba(18,140,126,0.12);
+                                    color: #128C7E;
+                                    padding: 4px 10px;
+                                    border: none;
+                                    border-radius: 16px;
+                                    cursor: pointer;
+                                    font-family: 'Cairo', sans-serif;
+                                    font-weight: 600;
+                                    font-size: 11px;
+                                    transition: all 0.2s ease;
+                                "
+                                onmouseover="this.style.background='rgba(18,140,126,0.25)'; this.style.transform='scale(1.05)'" 
+                                onmouseout="this.style.background='rgba(18,140,126,0.12)'; this.style.transform='scale(1)'"
+                                title="إرسال رسالة ترحيب">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                        
+                        <button onclick="deleteStudent(${student.id})" 
+                                style="
+                                    background: rgba(231,76,60,0.12);
+                                    color: #e74c3c;
+                                    padding: 4px 10px;
+                                    border: none;
+                                    border-radius: 16px;
+                                    cursor: pointer;
+                                    font-family: 'Cairo', sans-serif;
+                                    font-weight: 600;
+                                    font-size: 11px;
+                                    transition: all 0.2s ease;
+                                "
+                                onmouseover="this.style.background='rgba(231,76,60,0.25)'; this.style.transform='scale(1.05)'" 
+                                onmouseout="this.style.background='rgba(231,76,60,0.12)'; this.style.transform='scale(1)'"
+                                title="حذف الطالب">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `
+            </tbody>
+        </table>
+        <div style="
+            text-align: center;
+            padding: 12px;
+            color: rgba(255,255,255,0.15);
+            font-size: 12px;
+            border-top: 1px solid rgba(255,255,255,0.02);
+        ">
+            <i class="fas fa-users"></i> عرض ${filtered.length} طالب من إجمالي ${appData.students.filter(s => s.status !== 'pending').length}
+        </div>
+    `;
+
+    container.innerHTML = html;
+}
+
+function filterStudentsWithSuggestions() {
+    renderStudentsTableWithSuggestions();
+}
+
+function updateSuggestions(search) {
+    const box = document.getElementById('suggestionsBox');
+    if (!box) return;
+
+    if (!search || search.length < 1) {
+        box.style.display = 'none';
+        return;
+    }
+
+    const suggestions = appData.students.filter(s => 
+        s.name.toLowerCase().includes(search) || 
+        s.username.toLowerCase().includes(search)
+    ).slice(0, 6);
+
+    if (suggestions.length === 0) {
+        box.style.display = 'none';
+        return;
+    }
+
+    box.style.display = 'block';
+    box.innerHTML = suggestions.map(s => `
+        <div style="
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        " 
+        onmouseover="this.style.background='rgba(232,185,49,0.06)'"
+        onmouseout="this.style.background='transparent'"
+        onclick="selectSuggestion('${s.name}', '${s.username}')">
+            <div>
+                <strong style="color: rgba(255,255,255,0.8); font-size: 14px;">${escapeHtml(s.name)}</strong>
+                <br>
+                <small style="color: rgba(255,255,255,0.2); font-size: 11px;">👤 ${s.username}</small>
+            </div>
+            <span style="
+                background: rgba(232,185,49,0.06);
+                color: #e8b931;
+                padding: 2px 10px;
+                border-radius: 12px;
+                font-size: 11px;
+                font-weight: 600;
+            ">⭐ ${s.points || 0}</span>
+        </div>
+    `).join('');
+}
+
+function selectSuggestion(name, username) {
+    const input = document.getElementById('studentSearch');
+    if (input) {
+        input.value = name;
+    }
+    document.getElementById('suggestionsBox').style.display = 'none';
+    renderStudentsTableWithSuggestions();
+}
+
+function showSuggestions() {
+    const search = document.getElementById('studentSearch')?.value?.toLowerCase()?.trim() || '';
+    if (search.length > 0) {
+        updateSuggestions(search);
+    }
+}
+
+function hideSuggestions() {
+    setTimeout(() => {
+        const box = document.getElementById('suggestionsBox');
+        if (box) box.style.display = 'none';
+    }, 300);
 }
 
         // ==================== STUDENT - EXAMS ====================
@@ -8584,7 +9139,7 @@ function openWhatsApp(studentId) {
 }
 
 
-     // ==================== الدالة 7: تحديث startApp ====================
+   
 async function startApp() {
     await loadAllDataFromFirebase();
     addThemeStyles();
@@ -8616,33 +9171,38 @@ async function startApp() {
         window.renderLandingPage = renderLandingPage;
         window.renderAboutPage = renderAboutPage;
         window.showJoinRequestModal = showJoinRequestModal;
-window.showHomeworkDetails = showHomeworkDetails;
-window.filterHomeworkDetails = filterHomeworkDetails;
-window.renderHomeworkDetailsTable = renderHomeworkDetailsTable;
-window.exportHomeworkDetailsToPDF = exportHomeworkDetailsToPDF;
-window.showAddMeetingModal = showAddMeetingModal;
-window.renderAdminMeetings = renderAdminMeetings;
-window.renderStudentMeetings = renderStudentMeetings;
-window.showMeetingDetails = showMeetingDetails;
-window.filterMeetingDetails = filterMeetingDetails;
-window.deleteMeeting = deleteMeeting;
-window.markAttendance = markAttendance;
-window.endMeeting = endMeeting;
-window.renderAdminExams = renderAdminExams;
-window.renderStudentExams = renderStudentExams;
-window.showAddExamModal = showAddExamModal;
-window.showExamDetails = showExamDetails;
-window.stopExam = stopExam;
-window.activateExam = activateExam;
-window.deleteExam = deleteExam;
-window.markExamAttendance = markExamAttendance;
-window.exportExamDetailsToPDF = exportExamDetailsToPDF;
-window.renderAdminExamsList = renderAdminExamsList;
-window.togglePasswordVisibility = togglePasswordVisibility;
-window.exportStudentsToPDF = exportStudentsToPDF;
-window.showEditStudentModal = showEditStudentModal;
-window.sendWhatsApp = sendWhatsApp;
-window.openWhatsApp = openWhatsApp;
+        window.showHomeworkDetails = showHomeworkDetails;
+        window.filterHomeworkDetails = filterHomeworkDetails;
+        window.renderHomeworkDetailsTable = renderHomeworkDetailsTable;
+        window.exportHomeworkDetailsToPDF = exportHomeworkDetailsToPDF;
+        window.showAddMeetingModal = showAddMeetingModal;
+        window.renderAdminMeetings = renderAdminMeetings;
+        window.renderStudentMeetings = renderStudentMeetings;
+        window.showMeetingDetails = showMeetingDetails;
+        window.filterMeetingDetails = filterMeetingDetails;
+        window.deleteMeeting = deleteMeeting;
+        window.markAttendance = markAttendance;
+        window.endMeeting = endMeeting;
+        window.renderAdminExams = renderAdminExams;
+        window.renderStudentExams = renderStudentExams;
+        window.showAddExamModal = showAddExamModal;
+        window.showExamDetails = showExamDetails;
+        window.stopExam = stopExam;
+        window.activateExam = activateExam;
+        window.deleteExam = deleteExam;
+        window.markExamAttendance = markExamAttendance;
+        window.exportExamDetailsToPDF = exportExamDetailsToPDF;
+        window.renderAdminExamsList = renderAdminExamsList;
+        window.togglePasswordVisibility = togglePasswordVisibility;
+        window.exportStudentsToPDF = exportStudentsToPDF;
+        window.showEditStudentModal = showEditStudentModal;
+        window.sendWhatsApp = sendWhatsApp;
+        window.openWhatsApp = openWhatsApp;
+        window.filterStudentsWithSuggestions = filterStudentsWithSuggestions;
+        window.showSuggestions = showSuggestions;
+        window.hideSuggestions = hideSuggestions;
+        window.selectSuggestion = selectSuggestion;
+        window.renderStudentsTableWithSuggestions = renderStudentsTableWithSuggestions;
 
         // Start the app
         startApp();
