@@ -6475,7 +6475,7 @@ function renderStudentsTableWithSuggestions() {
                             <i class="fas fa-edit"></i>
                         </button>
                         
-                        <button onclick="openWhatsApp(${student.id})" 
+                        <button onclick="sendWhatsApp(${student.id})" 
                                 style="
                                     background: rgba(37,211,102,0.12);
                                     color: #25D366;
@@ -6492,25 +6492,6 @@ function renderStudentsTableWithSuggestions() {
                                 onmouseout="this.style.background='rgba(37,211,102,0.12)'; this.style.transform='scale(1)'"
                                 title="فتح محادثة واتساب">
                             <i class="fab fa-whatsapp"></i>
-                        </button>
-                        
-                        <button onclick="sendWhatsApp(${student.id})" 
-                                style="
-                                    background: rgba(18,140,126,0.12);
-                                    color: #128C7E;
-                                    padding: 4px 10px;
-                                    border: none;
-                                    border-radius: 16px;
-                                    cursor: pointer;
-                                    font-family: 'Cairo', sans-serif;
-                                    font-weight: 600;
-                                    font-size: 11px;
-                                    transition: all 0.2s ease;
-                                "
-                                onmouseover="this.style.background='rgba(18,140,126,0.25)'; this.style.transform='scale(1.05)'" 
-                                onmouseout="this.style.background='rgba(18,140,126,0.12)'; this.style.transform='scale(1)'"
-                                title="إرسال رسالة ترحيب">
-                            <i class="fas fa-paper-plane"></i>
                         </button>
                         
                         <button onclick="deleteStudent(${student.id})" 
