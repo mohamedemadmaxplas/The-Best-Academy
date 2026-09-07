@@ -8515,7 +8515,7 @@ function sendWhatsApp(studentId) {
 
 ━━━━━━━━━━━━━━━━━━━
 📱 رابط المنصة:
-https://tecno-shark.vercel.app
+https://the-best-academy.vercel.app
 ━━━━━━━━━━━━━━━━━━━
 
 💪 نتمنى لك رحلة تعليمية ممتعة ومفيدة!
@@ -8524,9 +8524,41 @@ The Best Academy 🏆
 مع Ms: Amira Sobhy`;
 
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
     
-    window.open(whatsappUrl, '_blank');
+    // محاولة فتح واتساب مباشرة (تطبيق الكمبيوتر)
+    try {
+        // أولاً: نحاول فتح التطبيق مباشرة
+        window.location.href = `whatsapp://send?phone=${phone}&text=${encodedMessage}`;
+    } catch (e) {
+        // لو فشل، نفتح الويب
+        window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
+    }
+}
+
+// ==================== OPEN WHATSAPP CHAT ====================
+function openWhatsApp(studentId) {
+    const student = appData.students.find(s => s.id === studentId);
+    if (!student) {
+        showToast('الطالب غير موجود', 'error');
+        return;
+    }
+
+    if (!student.phone) {
+        showToast('⚠️ هذا الطالب ليس لديه رقم هاتف مسجل', 'warning');
+        return;
+    }
+
+    let phone = student.phone.replace(/\s/g, '').replace(/^0+/, '');
+    if (!phone.startsWith('20')) {
+        phone = '20' + phone;
+    }
+
+    // محاولة فتح واتساب مباشرة (تطبيق الكمبيوتر)
+    try {
+        window.location.href = `whatsapp://send?phone=${phone}`;
+    } catch (e) {
+        window.open(`https://wa.me/${phone}`, '_blank');
+    }
 }
 
 
