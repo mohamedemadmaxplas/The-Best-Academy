@@ -2172,6 +2172,96 @@ body.light-mode #homeworkList .hw-item small {
     100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
 }
 
+/* ====== TOAST NOTIFICATIONS ====== */
+@keyframes toastSlideDown {
+    0% {
+        transform: translateX(-50%) translateY(-120px) scale(0.9);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(-50%) translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes toastSlideUp {
+    0% {
+        transform: translateX(-50%) translateY(0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(-50%) translateY(-120px) scale(0.9);
+        opacity: 0;
+    }
+}
+
+.custom-toast {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-120px);
+    max-width: 360px;
+    width: auto;
+    min-width: 200px;
+    border-radius: 14px;
+    z-index: 9999;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.12);
+    opacity: 0;
+    animation: toastSlideDown 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    overflow: hidden;
+}
+
+.custom-toast .toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3.5px;
+    background: rgba(255, 255, 255, 0.85);
+    width: 100%;
+    border-radius: 0 0 14px 14px;
+    transition: width 0.1s linear;
+    box-shadow: 0 0 10px rgba(255,255,255,0.3);
+}
+
+/* ====== تنسيق للهواتف ====== */
+@media (max-width: 480px) {
+    .custom-toast {
+        top: 12px;
+        max-width: 290px;
+        min-width: 160px;
+        border-radius: 12px;
+        font-size: 12px;
+    }
+    .custom-toast .toast-content {
+        padding: 10px 14px 12px 14px;
+        gap: 10px;
+    }
+    .custom-toast .toast-content span:first-child {
+        font-size: 16px !important;
+    }
+    .custom-toast .toast-content span:last-child {
+        font-size: 12px !important;
+    }
+    .custom-toast .toast-content button {
+        width: 20px !important;
+        height: 20px !important;
+        font-size: 10px !important;
+    }
+    .custom-toast .toast-progress {
+        height: 2.5px;
+    }
+}
+
+/* ====== تنسيق للشاشات المتوسطة ====== */
+@media (min-width: 481px) and (max-width: 768px) {
+    .custom-toast {
+        max-width: 330px;
+    }
+}
 
     </style>
 </head>
@@ -2212,27 +2302,178 @@ let appData = {
     examAttendance: []   // حضور الاجتماعات
 };
 
-        // ==================== TOAST NOTIFICATION ====================
-        function showToast(message, type = "success") {
-            const toast = document.createElement('div');
-            const colors = {
-                success: '#2ecc71',
-                error: '#e74c3c',
-                info: '#3498db',
-                warning: '#f39c12'
-            };
-            toast.style.cssText = `
-                position: fixed; bottom: 20px; right: 20px; 
-                background: ${colors[type] || colors.success}; 
-                color: #0a1628; padding: 12px 24px; border-radius: 40px; 
-                z-index: 3000; animation: slideUp 0.3s ease; 
-                box-shadow: 0 4px 12px rgba(0,0,0,0.3); 
-                font-weight: 500; max-width: 90%;
-            `;
-            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i> ${message}`;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3500);
+ function showToast(message, type = "success") {
+    // إزالة أي إشعار قديم
+    const oldToast = document.querySelector('.custom-toast');
+    if (oldToast) oldToast.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'custom-toast';
+    
+    // ====== ألوان حسب نوع الإشعار ======
+    const colors = {
+        success: {
+            bg: 'linear-gradient(135deg, #2ecc71, #27ae60)',
+            shadow: '0 6px 24px rgba(46, 204, 113, 0.25)'
+        },
+        error: {
+            bg: 'linear-gradient(135deg, #e74c3c, #c0392b)',
+            shadow: '0 6px 24px rgba(231, 76, 60, 0.25)'
+        },
+        info: {
+            bg: 'linear-gradient(135deg, #3498db, #2980b9)',
+            shadow: '0 6px 24px rgba(52, 152, 219, 0.25)'
+        },
+        warning: {
+            bg: 'linear-gradient(135deg, #f39c12, #e67e22)',
+            shadow: '0 6px 24px rgba(243, 156, 18, 0.25)'
         }
+    };
+
+    const color = colors[type] || colors.success;
+    
+    // ====== أيقونات ======
+    const icons = {
+        success: '✅',
+        error: '❌',
+        info: 'ℹ️',
+        warning: '⚠️'
+    };
+
+    toast.style.cssText = `
+        position: fixed;
+        top: 16px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-120px);
+        max-width: 360px;
+        width: auto;
+        min-width: 200px;
+        background: ${color.bg};
+        color: #ffffff;
+        border-radius: 14px;
+        z-index: 9999;
+        box-shadow: ${color.shadow};
+        font-family: 'Cairo', sans-serif;
+        font-weight: 500;
+        font-size: 13px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.12);
+        opacity: 0;
+        animation: toastSlideDown 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        overflow: hidden;
+    `;
+
+    // ====== المحتوى الداخلي ======
+    const content = document.createElement('div');
+    content.style.cssText = `
+        padding: 12px 16px 14px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    `;
+
+    // ====== الأيقونة ======
+    const iconSpan = document.createElement('span');
+    iconSpan.style.cssText = `
+        font-size: 20px;
+        line-height: 1;
+        flex-shrink: 0;
+    `;
+    iconSpan.textContent = icons[type] || '✅';
+
+    // ====== النص ======
+    const textSpan = document.createElement('span');
+    textSpan.style.cssText = `
+        flex: 1;
+        line-height: 1.3;
+        font-size: 13px;
+        text-align: center;
+    `;
+    textSpan.textContent = message;
+
+    // ====== زر الإغلاق ======
+    const closeBtn = document.createElement('button');
+    closeBtn.style.cssText = `
+        background: rgba(255,255,255,0.15);
+        border: none;
+        color: #ffffff;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+        padding: 0;
+    `;
+    closeBtn.innerHTML = '✕';
+    closeBtn.onmouseover = () => {
+        closeBtn.style.background = 'rgba(255,255,255,0.3)';
+        closeBtn.style.transform = 'scale(1.1)';
+    };
+    closeBtn.onmouseout = () => {
+        closeBtn.style.background = 'rgba(255,255,255,0.15)';
+        closeBtn.style.transform = 'scale(1)';
+    };
+
+    // ====== شريط التقدم - لون أبيض شفاف عشان يظهر ======
+    const progressBar = document.createElement('div');
+    progressBar.style.cssText = `
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3.5px;
+        background: rgba(255, 255, 255, 0.85);
+        width: 100%;
+        border-radius: 0 0 14px 14px;
+        transition: width 0.1s linear;
+        box-shadow: 0 0 10px rgba(255,255,255,0.3);
+    `;
+
+    // ====== تجميع العناصر ======
+    content.appendChild(iconSpan);
+    content.appendChild(textSpan);
+    content.appendChild(closeBtn);
+    toast.appendChild(content);
+    toast.appendChild(progressBar);
+    document.body.appendChild(toast);
+
+    // ====== بدء شريط التقدم ======
+    const duration = 3500;
+    const interval = 30;
+    let progress = 100;
+    const step = 100 / (duration / interval);
+
+    const progressInterval = setInterval(() => {
+        progress -= step;
+        if (progress <= 0) {
+            progress = 0;
+            clearInterval(progressInterval);
+            toast.style.animation = 'toastSlideUp 0.35s ease forwards';
+            setTimeout(() => toast.remove(), 350);
+        }
+        progressBar.style.width = progress + '%';
+    }, interval);
+
+    // ====== إغلاق يدوي ======
+    closeBtn.onclick = () => {
+        clearInterval(progressInterval);
+        toast.style.animation = 'toastSlideUp 0.35s ease forwards';
+        setTimeout(() => toast.remove(), 350);
+    };
+
+    // ====== إغلاق تلقائي احتياطي ======
+    setTimeout(() => {
+        if (toast.parentNode) {
+            clearInterval(progressInterval);
+            toast.style.animation = 'toastSlideUp 0.35s ease forwards';
+            setTimeout(() => toast.remove(), 350);
+        }
+    }, duration + 500);
+}
 
         // ==================== HELPERS ====================
         function escapeHtml(text) {
@@ -2322,19 +2563,69 @@ async function initializeDefaultData() {
             }
         }
 
-// ==================== LANDING PAGE ====================
 function renderLandingPage() {
     const app = document.getElementById('app');
     const isLightMode = document.body.classList.contains('light-mode');
+    
+    // ====== ألوان حسب الوضع ======
+    let colors;
+    if (isLightMode) {
+        colors = {
+            bgGradient: 'linear-gradient(135deg, #f5f0ff, #e8e0f5, #f0ecff)',
+            cardBg: 'rgba(255, 255, 255, 0.85)',
+            cardBorder: 'rgba(108,76,224,0.15)',
+            textPrimary: '#2D1B4E',
+            textSecondary: '#555555',
+            textMuted: 'rgba(45, 27, 78, 0.4)',
+            accent: '#6C4CE0',
+            headerBg: 'rgba(255,255,255,0.95)',
+            footerBg: 'rgba(255,255,255,0.95)',
+            featureBg: 'rgba(0,0,0,0.03)',
+            featureText: '#1a1a2e',
+            featureSubtext: '#666666',
+            btnAboutBg: 'transparent',
+            btnAboutColor: '#6C4CE0',
+            btnAboutBorder: '#6C4CE0',
+            particlesColor: 'rgba(108,76,224,0.1)',
+            shapeColor1: 'rgba(108,76,224,0.04)',
+            shapeColor2: 'rgba(52,152,219,0.04)',
+            shapeColor3: 'rgba(46,204,113,0.04)',
+            btnBorder: 'rgba(108,76,224,0.2)',
+        };
+    } else {
+        colors = {
+            bgGradient: 'linear-gradient(135deg, #0a0a1a, #1a1040, #0d0825)',
+            cardBg: 'rgba(10, 22, 40, 0.7)',
+            cardBorder: 'rgba(139,111,245,0.15)',
+            textPrimary: '#E8E4F5',
+            textSecondary: 'rgba(232, 228, 245, 0.7)',
+            textMuted: 'rgba(232, 228, 245, 0.3)',
+            accent: '#8B6FF5',
+            headerBg: 'rgba(10,22,40,0.95)',
+            footerBg: 'rgba(10,22,40,0.95)',
+            featureBg: 'rgba(255,255,255,0.05)',
+            featureText: 'rgba(255,255,255,0.8)',
+            featureSubtext: 'rgba(255,255,255,0.3)',
+            btnAboutBg: 'transparent',
+            btnAboutColor: '#8B6FF5',
+            btnAboutBorder: '#8B6FF5',
+            particlesColor: 'rgba(139,111,245,0.08)',
+            shapeColor1: 'rgba(139,111,245,0.04)',
+            shapeColor2: 'rgba(52,152,219,0.04)',
+            shapeColor3: 'rgba(46,204,113,0.04)',
+            btnBorder: 'rgba(139,111,245,0.15)',
+        };
+    }
     
     app.innerHTML = `
         <div style="
             min-height: 100vh;
             position: relative;
             overflow: hidden;
-            background: linear-gradient(135deg, #0a1628, #1a2a4a, #0d1f3c);
+            background: ${colors.bgGradient};
             display: flex;
             flex-direction: column;
+            transition: background 0.3s ease;
         ">
             <!-- Background Particles -->
             <div class="particles-bg" id="landingParticles" style="
@@ -2353,9 +2644,9 @@ function renderLandingPage() {
                 position: absolute;
                 width: 300px;
                 height: 300px;
-                background: #e8b931;
+                background: ${colors.accent};
                 border-radius: 50%;
-                opacity: 0.05;
+                opacity: 0.04;
                 pointer-events: none;
                 z-index: 0;
                 top: -50px;
@@ -2368,7 +2659,7 @@ function renderLandingPage() {
                 height: 200px;
                 background: #3498db;
                 border-radius: 50%;
-                opacity: 0.05;
+                opacity: 0.04;
                 pointer-events: none;
                 z-index: 0;
                 bottom: -50px;
@@ -2381,7 +2672,7 @@ function renderLandingPage() {
                 height: 150px;
                 background: #2ecc71;
                 border-radius: 50%;
-                opacity: 0.05;
+                opacity: 0.04;
                 pointer-events: none;
                 z-index: 0;
                 top: 50%;
@@ -2396,40 +2687,85 @@ function renderLandingPage() {
                 left: 0;
                 right: 0;
                 z-index: 100;
-                padding: 6px 15px;
-                background: ${isLightMode ? 'rgba(255,255,255,0.95)' : 'rgba(10,22,40,0.95)'};
+                padding: 8px 14px;
+                background: ${colors.headerBg};
                 backdrop-filter: blur(12px);
-                border-bottom: 1px solid rgba(232,185,49,0.15);
+                border-bottom: 1px solid rgba(139,111,245,0.08);
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                flex-wrap: wrap;
-                gap: 6px;
+                transition: background 0.3s ease;
             ">
-                <!-- ===== الأزرار في الناحية اليمنى ===== -->
-                <div style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap; order: 2;">
+                <!-- ===== الشعار (الناحية اليمنى) ===== -->
+                <div style="
+                    display: flex; 
+                    align-items: center; 
+                    gap: 8px; 
+                    cursor: pointer;
+                    flex-shrink: 0;
+                " onclick="renderLandingPage()">
+                    <img src="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png" 
+                         alt="The Best Academy" 
+                         style="
+                             width: 32px; 
+                             height: 32px; 
+                             border-radius: 50%; 
+                             object-fit: cover; 
+                             border: 2px solid ${colors.accent};
+                         ">
+                    <div>
+                        <h1 style="
+                            font-size: 13px; 
+                            color: ${colors.accent}; 
+                            margin: 0; 
+                            line-height: 1.1;
+                            font-weight: 800;
+                        ">
+                            The Best Academy
+                        </h1>
+                        <p style="
+                            font-size: 8px; 
+                            color: ${colors.textMuted}; 
+                            margin: 0; 
+                            line-height: 1.1;
+                        ">
+                            🏆 Ms: Amira Sobhy
+                        </p>
+                    </div>
+                </div>
+
+                <!-- ===== الأزرار (الناحية اليسرى) ===== -->
+                <div style="
+                    display: flex; 
+                    gap: 4px; 
+                    align-items: center; 
+                    flex-shrink: 0;
+                ">
+                    <!-- زر الثيم -->
                     <button onclick="toggleTheme()" 
+                            id="landingThemeBtn"
                             style="
-                                width: 28px; 
-                                height: 28px; 
+                                width: 30px; 
+                                height: 30px; 
                                 border-radius: 50%; 
-                                border: 1.5px solid #e8b931; 
-                                background: rgba(255,255,255,0.05); 
-                                color: #e8b931; 
+                                border: 1.5px solid ${colors.accent}; 
+                                background: ${isLightMode ? 'rgba(108,76,224,0.08)' : 'rgba(139,111,245,0.12)'};
+                                color: ${colors.accent}; 
                                 cursor: pointer; 
                                 display: flex; 
                                 align-items: center; 
                                 justify-content: center; 
                                 transition: all 0.3s ease; 
-                                font-size: 12px;
+                                font-size: 13px;
                                 padding: 0;
-                                min-width: 28px;
                                 font-family: 'Cairo', sans-serif;
+                                flex-shrink: 0;
                             "
                             title="تغيير الوضع">
                         <i class="fas ${isLightMode ? 'fa-sun' : 'fa-moon'}"></i>
                     </button>
                     
+                    <!-- زر من نحن -->
                     <button onclick="renderAboutPage()" 
                             style="
                                 padding: 4px 10px;
@@ -2438,15 +2774,16 @@ function renderLandingPage() {
                                 font-weight: 600;
                                 cursor: pointer;
                                 transition: all 0.3s ease;
-                                border: 1px solid rgba(255,255,255,0.15);
-                                font-size: 10px;
+                                border: 1px solid ${colors.btnBorder};
+                                font-size: 11px;
                                 white-space: nowrap;
-                                background: transparent;
-                                color: ${isLightMode ? '#333' : 'rgba(255,255,255,0.7)'};
+                                background: ${colors.btnAboutBg};
+                                color: ${colors.btnAboutColor};
                             ">
                         من نحن
                     </button>
                     
+                    <!-- زر دخول -->
                     <button onclick="renderLoginPage()" 
                             style="
                                 padding: 4px 12px;
@@ -2456,14 +2793,15 @@ function renderLandingPage() {
                                 cursor: pointer;
                                 transition: all 0.3s ease;
                                 border: none;
-                                font-size: 10px;
+                                font-size: 11px;
                                 white-space: nowrap;
-                                background: #e8b931;
-                                color: #0a1628;
+                                background: linear-gradient(135deg, ${colors.accent}, ${isLightMode ? '#4A2F9E' : '#6C4CE0'});
+                                color: #FFFFFF;
                             ">
                         دخول
                     </button>
                     
+                    <!-- زر انضمام -->
                     <button onclick="showJoinRequestModal()" 
                             style="
                                 padding: 4px 12px;
@@ -2473,24 +2811,13 @@ function renderLandingPage() {
                                 cursor: pointer;
                                 transition: all 0.3s ease;
                                 border: none;
-                                font-size: 10px;
+                                font-size: 11px;
                                 white-space: nowrap;
                                 background: #2ecc71;
                                 color: #0a1628;
                             ">
                         انضمام
                     </button>
-                </div>
-                
-                <!-- ===== اللوجو في الناحية اليسرى ===== -->
-                <div style="display: flex; align-items: center; gap: 8px; order: 1;">
-                    <img src="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png" 
-                         alt="The Best Academy" 
-                         style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid #e8b931;">
-                    <div>
-                        <h1 style="font-size: 13px; color: #e8b931; margin: 0; line-height: 1.1;">The Best Academy</h1>
-                        <p style="font-size: 7px; color: rgba(255,255,255,0.4); margin: 0; line-height: 1.1;">🏆 Ms: Amira Sobhy</p>
-                    </div>
                 </div>
             </header>
 
@@ -2507,16 +2834,17 @@ function renderLandingPage() {
                 flex: 1;
             ">
                 <div style="
-                    background: ${isLightMode ? 'rgba(255,255,255,0.9)' : 'rgba(10,22,40,0.7)'};
+                    background: ${colors.cardBg};
                     backdrop-filter: blur(15px);
                     border-radius: 30px;
                     padding: 35px 25px;
                     max-width: 800px;
                     width: 100%;
-                    border: 1px solid rgba(232,185,49,0.2);
+                    border: 1px solid ${colors.cardBorder};
                     animation: fadeInUp 1s ease;
                     position: relative;
                     overflow: hidden;
+                    transition: all 0.3s ease;
                 ">
                     <!-- Glow Effect -->
                     <div style="
@@ -2526,7 +2854,7 @@ function renderLandingPage() {
                         left: -50%;
                         width: 200%;
                         height: 200%;
-                        background: radial-gradient(circle at center, rgba(232,185,49,0.05), transparent 70%);
+                        background: radial-gradient(circle at center, ${colors.accent}08, transparent 70%);
                         animation: glowPulse 4s ease-in-out infinite;
                         pointer-events: none;
                     "></div>
@@ -2538,8 +2866,8 @@ function renderLandingPage() {
                         margin: 0 auto 12px;
                         border-radius: 50%;
                         overflow: hidden;
-                        border: 3px solid #e8b931;
-                        box-shadow: 0 0 40px rgba(232,185,49,0.15);
+                        border: 3px solid ${colors.accent};
+                        box-shadow: 0 0 40px ${colors.accent}15;
                         animation: floatLogo 3s ease-in-out infinite;
                         position: relative;
                         z-index: 1;
@@ -2552,19 +2880,19 @@ function renderLandingPage() {
                     <!-- Title -->
                     <h1 style="
                         font-size: 28px;
-                        color: #e8b931;
+                        color: ${colors.accent};
                         font-weight: 800;
                         margin-bottom: 2px;
                         position: relative;
                         z-index: 1;
                     ">
-                        The Best <span style="color: ${isLightMode ? '#1a1a2e' : '#fff'};">Academy</span>
+                        The Best <span style="color: ${colors.textPrimary};">Academy</span>
                     </h1>
                     
                     <!-- Teacher -->
                     <p style="
                         font-size: 16px;
-                        color: #e8b931;
+                        color: ${colors.accent};
                         font-weight: 600;
                         margin-bottom: 12px;
                         position: relative;
@@ -2578,7 +2906,7 @@ function renderLandingPage() {
                     <!-- Description -->
                     <p style="
                         font-size: 14px;
-                        color: ${isLightMode ? '#555' : 'rgba(255,255,255,0.7)'};
+                        color: ${colors.textSecondary};
                         margin-bottom: 18px;
                         line-height: 1.8;
                         position: relative;
@@ -2586,7 +2914,7 @@ function renderLandingPage() {
                         padding: 0 5px;
                     ">
                         منصة تعليمية متكاملة لتعليم اللغة الإنجليزية<br>
-                        مع <span style="color: #e8b931; font-weight: 600;">ميس أميرة صبحي</span> - خبرة في تدريس جميع المراحل
+                        مع <span style="color: ${colors.accent}; font-weight: 600;">ميس أميرة صبحي</span> - خبرة في تدريس جميع المراحل
                     </p>
                     
                     <!-- ===== FEATURES SECTION ===== -->
@@ -2598,53 +2926,24 @@ function renderLandingPage() {
                         position: relative;
                         z-index: 1;
                     ">
-                        <div style="
-                            background: ${isLightMode ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.05)'};
-                            border-radius: 12px;
-                            padding: 12px 8px;
-                            border: 1px solid rgba(232,185,49,0.08);
-                            transition: 0.3s;
-                        ">
-                            <div style="font-size: 24px; margin-bottom: 3px;">📚</div>
-                            <div style="font-size: 12px; font-weight: 600; color: ${isLightMode ? '#1a1a2e' : 'rgba(255,255,255,0.8)'};">فصول تفاعلية</div>
-                            <div style="font-size: 10px; color: ${isLightMode ? '#666' : 'rgba(255,255,255,0.3)'};">تعليم منظم</div>
-                        </div>
-                        
-                        <div style="
-                            background: ${isLightMode ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.05)'};
-                            border-radius: 12px;
-                            padding: 12px 8px;
-                            border: 1px solid rgba(232,185,49,0.08);
-                            transition: 0.3s;
-                        ">
-                            <div style="font-size: 24px; margin-bottom: 3px;">📝</div>
-                            <div style="font-size: 12px; font-weight: 600; color: ${isLightMode ? '#1a1a2e' : 'rgba(255,255,255,0.8)'};">واجبات تفاعلية</div>
-                            <div style="font-size: 10px; color: ${isLightMode ? '#666' : 'rgba(255,255,255,0.3)'};">تقييم فوري</div>
-                        </div>
-                        
-                        <div style="
-                            background: ${isLightMode ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.05)'};
-                            border-radius: 12px;
-                            padding: 12px 8px;
-                            border: 1px solid rgba(232,185,49,0.08);
-                            transition: 0.3s;
-                        ">
-                            <div style="font-size: 24px; margin-bottom: 3px;">⭐</div>
-                            <div style="font-size: 12px; font-weight: 600; color: ${isLightMode ? '#1a1a2e' : 'rgba(255,255,255,0.8)'};">نقاط وتحفيز</div>
-                            <div style="font-size: 10px; color: ${isLightMode ? '#666' : 'rgba(255,255,255,0.3)'};">تشجيع على التفوق</div>
-                        </div>
-                        
-                        <div style="
-                            background: ${isLightMode ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.05)'};
-                            border-radius: 12px;
-                            padding: 12px 8px;
-                            border: 1px solid rgba(232,185,49,0.08);
-                            transition: 0.3s;
-                        ">
-                            <div style="font-size: 24px; margin-bottom: 3px;">🏆</div>
-                            <div style="font-size: 12px; font-weight: 600; color: ${isLightMode ? '#1a1a2e' : 'rgba(255,255,255,0.8)'};">ترتيب الطلاب</div>
-                            <div style="font-size: 10px; color: ${isLightMode ? '#666' : 'rgba(255,255,255,0.3)'};">منافسة شريفة</div>
-                        </div>
+                        ${[
+                            { icon: '📚', title: 'فصول تفاعلية', sub: 'تعليم منظم' },
+                            { icon: '📝', title: 'واجبات تفاعلية', sub: 'تقييم فوري' },
+                            { icon: '⭐', title: 'نقاط وتحفيز', sub: 'تشجيع على التفوق' },
+                            { icon: '🏆', title: 'ترتيب الطلاب', sub: 'منافسة شريفة' }
+                        ].map(f => `
+                            <div style="
+                                background: ${colors.featureBg};
+                                border-radius: 12px;
+                                padding: 12px 8px;
+                                border: 1px solid ${isLightMode ? 'rgba(108,76,224,0.06)' : 'rgba(139,111,245,0.06)'};
+                                transition: 0.3s;
+                            ">
+                                <div style="font-size: 24px; margin-bottom: 3px;">${f.icon}</div>
+                                <div style="font-size: 12px; font-weight: 600; color: ${colors.featureText};">${f.title}</div>
+                                <div style="font-size: 10px; color: ${colors.featureSubtext};">${f.sub}</div>
+                            </div>
+                        `).join('')}
                     </div>
                     
                     <!-- Buttons -->
@@ -2689,9 +2988,9 @@ function renderLandingPage() {
                                     transition: all 0.4s ease;
                                     position: relative;
                                     overflow: hidden;
-                                    background: linear-gradient(135deg, #e8b931, #d4a017);
-                                    color: #0a1628;
-                                    box-shadow: 0 5px 25px rgba(232,185,49,0.3);
+                                    background: linear-gradient(135deg, ${colors.accent}, ${isLightMode ? '#4A2F9E' : '#6C4CE0'});
+                                    color: #FFFFFF;
+                                    box-shadow: 0 5px 25px ${colors.accent}30;
                                 "
                                 onmouseover="this.style.transform='translateY(-3px) scale(1.02)'" 
                                 onmouseout="this.style.transform='translateY(0) scale(1)'">
@@ -2705,15 +3004,15 @@ function renderLandingPage() {
                                     font-size: 13px;
                                     font-weight: 700;
                                     cursor: pointer;
-                                    border: 2px solid #e8b931;
+                                    border: 2px solid ${colors.accent};
                                     font-family: 'Cairo', sans-serif;
                                     transition: all 0.4s ease;
                                     position: relative;
                                     overflow: hidden;
                                     background: transparent;
-                                    color: #e8b931;
+                                    color: ${colors.accent};
                                 "
-                                onmouseover="this.style.background='rgba(232,185,49,0.1)'; this.style.transform='translateY(-3px)'" 
+                                onmouseover="this.style.background='${colors.accent}08'; this.style.transform='translateY(-3px)'" 
                                 onmouseout="this.style.background='transparent'; this.style.transform='translateY(0)'">
                             <i class="fas fa-info-circle"></i> من نحن
                         </button>
@@ -2722,173 +3021,230 @@ function renderLandingPage() {
             </div>
 
             <!-- ===== FOOTER ===== -->
-            <footer style="
-                padding: 15px 20px 12px;
-                position: relative;
-                z-index: 1;
-                background: ${isLightMode ? 'rgba(255,255,255,0.95)' : 'rgba(10,22,40,0.95)'};
-                border-top: 1px solid rgba(232,185,49,0.1);
+<footer style="
+    padding: 8px 12px 6px;
+    position: relative;
+    z-index: 1;
+    background: ${colors.footerBg};
+    border-top: 1px solid rgba(139,111,245,0.05);
+    transition: background 0.3s ease;
+">
+    <div style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 4px;
+        max-width: 1200px;
+        margin: 0 auto;
+    ">
+        <!-- ===== الجهة اليمنى: الأكاديمية ===== -->
+        <div style="
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1px;
+        ">
+            <span style="
+                font-size: 12px;
+                font-weight: 700;
+                color: ${colors.accent};
             ">
-                <div style="
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    flex-wrap: wrap;
-                    gap: 15px;
-                    max-width: 1200px;
-                    margin: 0 auto;
-                ">
-                    <!-- ===== الجهة اليمنى: الأكاديمية ===== -->
-                    <div style="
-                        display: flex;
-                        flex-direction: column;
-                        align-items: flex-start;
-                        gap: 3px;
-                    ">
-                        <span style="
-                            font-size: 16px;
-                            font-weight: 700;
-                            color: #e8b931;
-                        ">
-                            The Best Academy
-                        </span>
-                        <span style="
-                            font-size: 12px;
-                            color: ${isLightMode ? '#666' : 'rgba(255,255,255,0.5)'};
-                        ">
-                             <i class="fas fa-chalkboard-teacher" style="color: #e8b931;"></i> 
-                            Ms: Amira Sobhy
-                        </span>
-                        <span style="
-                            font-size: 12px;
-                            color: ${isLightMode ? '#666' : 'rgba(255,255,255,0.5)'};
-                            direction: ltr;
-                        ">
-                            <i class="fas fa-phone" style="color: #2ecc71;"></i> 
-                            01026463211
-                        </span>
-                        <!-- ===== زر فيسبوك تحت الرقم ===== -->
-                        <a href="https://www.facebook.com/share/16FegisqyWZ/" 
-                           target="_blank"
-                           style="
-                               background: linear-gradient(135deg, #1877f2, #0d65d9);
-                               color: white;
-                               padding: 5px 14px;
-                               border-radius: 20px;
-                               text-decoration: none;
-                               font-family: 'Cairo', sans-serif;
-                               font-weight: 600;
-                               font-size: 11px;
-                               transition: all 0.3s ease;
-                               display: inline-flex;
-                               align-items: center;
-                               gap: 6px;
-                               margin-top: 4px;
-                               box-shadow: 0 3px 12px rgba(24, 119, 242, 0.25);
-                           "
-                           onmouseover="this.style.transform='translateY(-2px) scale(1.03)'; this.style.boxShadow='0 6px 20px rgba(24, 119, 242, 0.4)'"
-                           onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 3px 12px rgba(24, 119, 242, 0.25)'">
-                            <i class="fab fa-facebook-f" style="font-size: 12px;"></i> 
-                            فيسبوك
-                        </a>
-                    </div>
+                The Best Academy
+            </span>
+            <span style="
+                font-size: 9px;
+                color: ${colors.textMuted};
+            ">
+                <i class="fas fa-chalkboard-teacher" style="color: ${colors.accent}; font-size: 8px;"></i> 
+                Ms: Amira Sobhy
+            </span>
+            <span style="
+                font-size: 9px;
+                color: ${colors.textMuted};
+                direction: ltr;
+            ">
+                <i class="fas fa-phone" style="color: #2ecc71; font-size: 8px;"></i> 
+                01026463211
+            </span>
+            <a href="https://www.facebook.com/share/16FegisqyWZ/" 
+               target="_blank"
+               style="
+                   background: linear-gradient(135deg, #1877f2, #0d65d9);
+                   color: white;
+                   padding: 2px 10px;
+                   border-radius: 14px;
+                   text-decoration: none;
+                   font-family: 'Cairo', sans-serif;
+                   font-weight: 600;
+                   font-size: 8px;
+                   transition: all 0.3s ease;
+                   display: inline-flex;
+                   align-items: center;
+                   gap: 4px;
+                   margin-top: 2px;
+                   box-shadow: 0 2px 8px rgba(24, 119, 242, 0.2);
+               "
+               onmouseover="this.style.transform='translateY(-1px) scale(1.03)'"
+               onmouseout="this.style.transform='translateY(0) scale(1)'">
+                <i class="fab fa-facebook-f" style="font-size: 8px;"></i> 
+                فيسبوك
+            </a>
+        </div>
 
-                    <!-- ===== الجهة اليسرى: Tecno Shark ===== -->
-                    <div style="
-                        display: flex;
-                        flex-direction: column;
-                        align-items: flex-end;
-                        gap: 4px;
-                    ">
-                        <span style="
-                            font-size: 15px;
-                            font-weight: 700;
-                            color: ${isLightMode ? '#1a1a2e' : '#fff'};
-                        ">
-                            <span style="color: #e8b931;">Tecno</span> 
-                            <span style="color: ${isLightMode ? '#1a1a2e' : '#fff'};">Shark</span>
-                            <span style="color: #e8b931; font-size: 10px;">™</span>
-                        </span>
-                        <a href="https://tecno-shark.vercel.app" 
-                           target="_blank"
-                           style="
-                               background: linear-gradient(135deg, #e8b931, #d4a017);
-                               color: #0a1628;
-                               padding: 4px 14px;
-                               border-radius: 20px;
-                               text-decoration: none;
-                               font-family: 'Cairo', sans-serif;
-                               font-weight: 600;
-                               font-size: 11px;
-                               transition: all 0.3s ease;
-                               display: inline-flex;
-                               align-items: center;
-                               gap: 5px;
-                               box-shadow: 0 3px 12px rgba(232,185,49,0.2);
-                           "
-                           onmouseover="this.style.transform='translateY(-2px) scale(1.03)'; this.style.boxShadow='0 6px 20px rgba(232,185,49,0.35)'"
-                           onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 3px 12px rgba(232,185,49,0.2)'">
-                            <i class="fas fa-globe" style="font-size: 12px;"></i> 
-                            موقع الشركة
-                        </a>
-                        <span style="
-                            color: ${isLightMode ? '#bbb' : 'rgba(255,255,255,0.15)'};
-                            font-size: 9px;
-                        ">
-                            <i class="fas fa-code" style="color: #e8b931;"></i> 
-                            Developed by Tecno Shark
-                        </span>
-                    </div>
-                </div>
+        <!-- ===== الجهة اليسرى: Tecno Shark ===== -->
+        <div style="
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 1px;
+        ">
+            <span style="
+                font-size: 11px;
+                font-weight: 700;
+                color: ${colors.textPrimary};
+            ">
+                <span style="color: ${colors.accent};">Tecno</span> 
+                <span style="color: ${colors.textPrimary};">Shark</span>
+                <span style="color: ${colors.accent}; font-size: 7px;">™</span>
+            </span>
+            <a href="https://tecno-shark.vercel.app" 
+               target="_blank"
+               style="
+                   background: linear-gradient(135deg, ${colors.accent}, ${isLightMode ? '#4A2F9E' : '#6C4CE0'});
+                   color: #FFFFFF;
+                   padding: 2px 10px;
+                   border-radius: 14px;
+                   text-decoration: none;
+                   font-family: 'Cairo', sans-serif;
+                   font-weight: 600;
+                   font-size: 8px;
+                   transition: all 0.3s ease;
+                   display: inline-flex;
+                   align-items: center;
+                   gap: 4px;
+                   box-shadow: 0 2px 8px ${colors.accent}15;
+               "
+               onmouseover="this.style.transform='translateY(-1px) scale(1.03)'"
+               onmouseout="this.style.transform='translateY(0) scale(1)'">
+                <i class="fas fa-globe" style="font-size: 8px;"></i> 
+                موقع الشركة
+            </a>
+            <span style="
+                color: ${colors.textMuted};
+                font-size: 7px;
+            ">
+                <i class="fas fa-code" style="color: ${colors.accent}; font-size: 6px;"></i> 
+                Developed by Tecno Shark
+            </span>
+        </div>
+    </div>
 
-                <!-- ===== خط فاصل سفلي ===== -->
-                <div style="
-                    height: 1px;
-                    background: linear-gradient(90deg, transparent, rgba(232,185,49,0.12), transparent);
-                    margin: 10px auto 8px;
-                    max-width: 90%;
-                "></div>
-                
-                <!-- ===== حقوق النشر ===== -->
-                <div style="
-                    text-align: center;
-                    color: ${isLightMode ? '#bbb' : 'rgba(255,255,255,0.12)'};
-                    font-size: 9px;
-                ">
-                    <p>© 2025 جميع الحقوق محفوظة | 
-                        <span style="color: #e8b931; font-weight: 600;">The Best Academy</span> 
-                        | <span style="color: ${isLightMode ? '#999' : 'rgba(255,255,255,0.25)'};">Ms: Amira Sobhy</span>
-                    </p>
-                </div>
-            </footer>
+    <!-- ===== خط فاصل ===== -->
+    <div style="
+        height: 1px;
+        background: linear-gradient(90deg, transparent, ${colors.accent}10, transparent);
+        margin: 4px auto 3px;
+        max-width: 90%;
+    "></div>
+    
+    <!-- ===== حقوق النشر ===== -->
+    <div style="
+        text-align: center;
+        color: ${colors.textMuted};
+        font-size: 7px;
+    ">
+        <p>© 2025 جميع الحقوق محفوظة | 
+            <span style="color: ${colors.accent}; font-weight: 600;">The Best Academy</span> 
+            | <span style="color: ${colors.textMuted};">Ms: Amira Sobhy</span>
+        </p>
+    </div>
+</footer>
         </div>
     `;
 
     // Create particles
     createParticlesBg('#landingParticles');
+    
+    // تحديث زر الثيم في صفحة الهبوط
+    const landingThemeBtn = document.getElementById('landingThemeBtn');
+    if (landingThemeBtn) {
+        landingThemeBtn.innerHTML = `<i class="fas ${isLightMode ? 'fa-sun' : 'fa-moon'}"></i>`;
+    }
+    
     initTheme();
 }
 
-    // ==================== صفحة من نحن كاملة مع كل المعلومات والجلاس ====================
 function renderAboutPage() {
     const app = document.getElementById('app');
     const isLightMode = document.body.classList.contains('light-mode');
     
-    // الألوان الأساسية
-    const primary = '#6C4CE0';
-    const primaryLight = '#8B6FF5';
-    const primaryDark = '#4A2F9E';
-    const bgLight = '#F0EEFF';
-    const bgDark = '#0D0825';
-    const textLight = '#1A1035';
-    const textDark = '#E8E4F5';
-    const cardLight = 'rgba(255,255,255,0.7)';
-    const cardDark = 'rgba(26,16,64,0.7)';
+    // ====== ألوان حسب الوضع ======
+    let colors;
+    if (isLightMode) {
+        // الوضع النهاري
+        colors = {
+            bg: '#f5f0ff',
+            bgGradient: 'linear-gradient(135deg, #f5f0ff, #e8e0f5, #f0ecff)',
+            textPrimary: '#2D1B4E',
+            textSecondary: '#4A3A6A',
+            textMuted: 'rgba(45, 27, 78, 0.4)',
+            accent: '#6C4CE0',
+            accentDark: '#4A2F9E',
+            cardBg: 'rgba(255, 255, 255, 0.7)',
+            cardBorder: 'rgba(108,76,224,0.1)',
+            glassBg: 'rgba(255, 255, 255, 0.7)',
+            glassBorder: 'rgba(108,76,224,0.08)',
+            headerBg: 'rgba(255,255,255,0.95)',
+            footerBg: 'rgba(255,255,255,0.95)',
+            heroBg: 'rgba(108,76,224,0.04)',
+            ctaBg: 'linear-gradient(135deg, #6C4CE0, #4A2F9E)',
+            ctaText: '#FFFFFF',
+            flowBg: 'rgba(108,76,224,0.04)',
+            flowBorder: 'rgba(108,76,224,0.08)',
+            cardHover: 'rgba(108,76,224,0.05)',
+            btnAboutBg: 'transparent',
+            btnAboutColor: '#6C4CE0',
+            btnAboutBorder: '#6C4CE0',
+            shapeColor: 'rgba(108,76,224,0.03)',
+        };
+    } else {
+        // الوضع الليلي
+        colors = {
+            bg: '#0a0a1a',
+            bgGradient: 'linear-gradient(135deg, #0a0a1a, #1a1040, #0d0825)',
+            textPrimary: '#E8E4F5',
+            textSecondary: 'rgba(232, 228, 245, 0.7)',
+            textMuted: 'rgba(232, 228, 245, 0.3)',
+            accent: '#8B6FF5',
+            accentDark: '#6C4CE0',
+            cardBg: 'rgba(26, 16, 64, 0.7)',
+            cardBorder: 'rgba(139,111,245,0.12)',
+            glassBg: 'rgba(26, 16, 64, 0.7)',
+            glassBorder: 'rgba(139,111,245,0.08)',
+            headerBg: 'rgba(13,8,37,0.95)',
+            footerBg: 'rgba(13,8,37,0.95)',
+            heroBg: 'rgba(139,111,245,0.06)',
+            ctaBg: 'linear-gradient(135deg, #8B6FF5, #6C4CE0)',
+            ctaText: '#FFFFFF',
+            flowBg: 'rgba(139,111,245,0.06)',
+            flowBorder: 'rgba(139,111,245,0.08)',
+            cardHover: 'rgba(139,111,245,0.06)',
+            btnAboutBg: 'transparent',
+            btnAboutColor: '#8B6FF5',
+            btnAboutBorder: '#8B6FF5',
+            shapeColor: 'rgba(139,111,245,0.03)',
+        };
+    }
     
     app.innerHTML = `
-        <div class="about-page" style="min-height:100vh; background:${isLightMode ? bgLight : bgDark}; padding-bottom: 10px;">
-            
-            <!-- ===== الهيدر ===== -->
+        <div class="about-page" style="
+            min-height:100vh; 
+            background: ${colors.bg};
+            padding-bottom: 10px;
+            transition: background 0.3s ease;
+        ">
+            <!-- ===== HEADER ===== -->
             <header style="
                 position: fixed;
                 top: 0;
@@ -2896,25 +3252,35 @@ function renderAboutPage() {
                 right: 0;
                 z-index: 100;
                 padding: 6px 15px;
-                background: ${isLightMode ? 'rgba(255,255,255,0.95)' : 'rgba(13,8,37,0.95)'};
+                background: ${colors.headerBg};
                 backdrop-filter: blur(12px);
-                border-bottom: 1px solid rgba(108,76,224,0.15);
+                border-bottom: 1px solid rgba(139,111,245,0.08);
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
                 flex-wrap: wrap;
                 gap: 6px;
+                transition: background 0.3s ease;
             ">
                 <div style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap; order: 2;">
-                    <button onclick="toggleTheme()" id="themeToggleBtn"
+                    <button onclick="toggleTheme()" 
+                            id="themeToggleBtn"
                             style="
-                                width: 28px; height: 28px; border-radius: 50%; 
-                                border: 1.5px solid ${primary}; 
-                                background: rgba(108,76,224,0.1); 
-                                color: ${primary}; cursor: pointer; 
-                                display: flex; align-items: center; justify-content: center; 
-                                transition: all 0.3s ease; font-size: 12px;
-                                padding: 0; min-width: 28px; font-family: 'Cairo', sans-serif;
+                                width: 28px; 
+                                height: 28px; 
+                                border-radius: 50%; 
+                                border: 1.5px solid ${colors.accent}; 
+                                background: ${isLightMode ? 'rgba(108,76,224,0.08)' : 'rgba(139,111,245,0.12)'};
+                                color: ${colors.accent}; 
+                                cursor: pointer; 
+                                display: flex; 
+                                align-items: center; 
+                                justify-content: center; 
+                                transition: all 0.3s ease; 
+                                font-size: 12px;
+                                padding: 0;
+                                min-width: 28px;
+                                font-family: 'Cairo', sans-serif;
                             "
                             title="تغيير الوضع">
                         <i class="fas ${isLightMode ? 'fa-sun' : 'fa-moon'}"></i>
@@ -2922,24 +3288,33 @@ function renderAboutPage() {
                     
                     <button onclick="renderAboutPage()" 
                             style="
-                                padding: 4px 10px; border-radius: 20px;
-                                font-family: 'Cairo', sans-serif; font-weight: 600;
-                                cursor: pointer; transition: all 0.3s ease;
-                                border: 1px solid rgba(108,76,224,0.2);
-                                font-size: 10px; white-space: nowrap;
+                                padding: 4px 10px;
+                                border-radius: 20px;
+                                font-family: 'Cairo', sans-serif;
+                                font-weight: 600;
+                                cursor: pointer;
+                                transition: all 0.3s ease;
+                                border: 1px solid ${isLightMode ? 'rgba(108,76,224,0.2)' : 'rgba(255,255,255,0.08)'};
+                                font-size: 10px;
+                                white-space: nowrap;
                                 background: transparent;
-                                color: ${isLightMode ? textLight : textDark};
+                                color: ${colors.textSecondary};
                             ">
                         من نحن
                     </button>
                     
                     <button onclick="renderLoginPage()" 
                             style="
-                                padding: 4px 12px; border-radius: 20px;
-                                font-family: 'Cairo', sans-serif; font-weight: 600;
-                                cursor: pointer; transition: all 0.3s ease;
-                                border: none; font-size: 10px; white-space: nowrap;
-                                background: linear-gradient(135deg, ${primary}, ${primaryDark});
+                                padding: 4px 12px;
+                                border-radius: 20px;
+                                font-family: 'Cairo', sans-serif;
+                                font-weight: 600;
+                                cursor: pointer;
+                                transition: all 0.3s ease;
+                                border: none;
+                                font-size: 10px;
+                                white-space: nowrap;
+                                background: linear-gradient(135deg, ${colors.accent}, ${colors.accentDark});
                                 color: #FFFFFF;
                             ">
                         دخول
@@ -2947,27 +3322,31 @@ function renderAboutPage() {
                     
                     <button onclick="showJoinRequestModal()" 
                             style="
-                                padding: 4px 12px; border-radius: 20px;
-                                font-family: 'Cairo', sans-serif; font-weight: 600;
-                                cursor: pointer; transition: all 0.3s ease;
-                                border: none; font-size: 10px; white-space: nowrap;
-                                background: linear-gradient(135deg, ${primary}, ${primaryDark});
+                                padding: 4px 12px;
+                                border-radius: 20px;
+                                font-family: 'Cairo', sans-serif;
+                                font-weight: 600;
+                                cursor: pointer;
+                                transition: all 0.3s ease;
+                                border: none;
+                                font-size: 10px;
+                                white-space: nowrap;
+                                background: linear-gradient(135deg, ${colors.accent}, ${colors.accentDark});
                                 color: #FFFFFF;
                             ">
                         انضمام
                     </button>
                 </div>
                 
-
-<div style="display: flex; align-items: center; gap: 8px; order: 1; cursor: pointer;" onclick="renderLandingPage()">
-    <img src="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png" 
-         alt="The Best Academy" 
-         style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid ${primary};">
-    <div>
-        <h1 style="font-size: 13px; color: ${primary}; margin: 0; line-height: 1.1;">The Best Academy</h1>
-        <p style="font-size: 7px; color: ${isLightMode ? 'rgba(108,76,224,0.5)' : 'rgba(139,111,245,0.5)'}; margin: 0; line-height: 1.1;">🏆 Ms: Amira Sobhy</p>
-    </div>
-</div>
+                <div style="display: flex; align-items: center; gap: 8px; order: 1; cursor: pointer;" onclick="renderLandingPage()">
+                    <img src="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png" 
+                         alt="The Best Academy" 
+                         style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid ${colors.accent};">
+                    <div>
+                        <h1 style="font-size: 13px; color: ${colors.accent}; margin: 0; line-height: 1.1;">The Best Academy</h1>
+                        <p style="font-size: 7px; color: ${colors.textMuted}; margin: 0; line-height: 1.1;">🏆 Ms: Amira Sobhy</p>
+                    </div>
+                </div>
             </header>
 
             <!-- ===== المحتوى ===== -->
@@ -2977,34 +3356,46 @@ function renderAboutPage() {
                 <div class="about-hero animate-on-scroll" style="
                     padding: 35px 20px 25px; 
                     text-align:center; 
-                    background: ${isLightMode ? 'rgba(108,76,224,0.06)' : 'rgba(108,76,224,0.08)'};
+                    background: ${colors.heroBg};
                     backdrop-filter: blur(10px);
                     border-radius: 30px; 
                     margin: 10px 12px 18px; 
-                    border: 1px solid ${isLightMode ? 'rgba(108,76,224,0.1)' : 'rgba(108,76,224,0.15)'};
+                    border: 1px solid ${colors.glassBorder};
+                    transition: all 0.3s ease;
                 ">
                     <div class="about-logo" style="
                         width: 85px; height: 85px; 
                         border-radius: 50%; overflow: hidden; 
                         margin: 0 auto 10px; 
-                        border: 3px solid ${primary}; 
-                        box-shadow: 0 0 25px rgba(108,76,224,0.15);
+                        border: 3px solid ${colors.accent}; 
+                        box-shadow: 0 0 25px ${colors.accent}15;
                     ">
                         <img src="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png" alt="The Best Academy" style="width:100%; height:100%; object-fit:cover;">
                     </div>
-                    <h1 style="font-size: 30px; color: ${isLightMode ? textLight : textDark}; margin-bottom: 2px;">
-                        من <span style="color: ${primary};">نحن؟</span>
+                    <h1 style="
+                        font-size: 30px; 
+                        color: ${colors.textPrimary}; 
+                        margin-bottom: 2px;
+                        transition: color 0.3s ease;
+                    ">
+                        من <span style="color: ${colors.accent};">نحن؟</span>
                     </h1>
-                    <p class="about-teacher" style="font-size: 17px; color: ${primary}; font-weight: 600; margin-bottom: 8px;">
+                    <p class="about-teacher" style="
+                        font-size: 17px; 
+                        color: ${colors.accent}; 
+                        font-weight: 600; 
+                        margin-bottom: 8px;
+                    ">
                         <i class="fas fa-chalkboard-teacher"></i> Ms: Amira Sobhy
                     </p>
                     <p class="about-slogan" style="
                         font-size: 16px; 
-                        color: ${isLightMode ? '#4A3A6A' : 'rgba(232,228,245,0.7)'}; 
+                        color: ${colors.textSecondary}; 
                         font-weight: 500; 
                         max-width: 550px; 
                         margin: 0 auto; 
                         line-height: 1.7;
+                        transition: color 0.3s ease;
                     ">
                         "نصنع تجربة تعليمية تجعل تعلم اللغة الإنجليزية أسهل، أكثر تفاعلاً، وأكثر متعة."
                     </p>
@@ -3012,31 +3403,34 @@ function renderAboutPage() {
 
                 <!-- About Academy -->
                 <div class="about-section animate-on-scroll" style="
-                    background: ${isLightMode ? cardLight : cardDark};
+                    background: ${colors.glassBg};
                     backdrop-filter: blur(12px);
                     border-radius: 25px; 
                     padding: 22px 25px; 
                     margin: 0 12px 16px; 
-                    border: 1px solid ${isLightMode ? 'rgba(108,76,224,0.12)' : 'rgba(108,76,224,0.2)'};
-                    box-shadow: ${isLightMode ? '0 4px 20px rgba(108,76,224,0.06)' : '0 4px 20px rgba(0,0,0,0.3)'};
+                    border: 1px solid ${colors.glassBorder};
+                    box-shadow: ${isLightMode ? '0 4px 20px rgba(108,76,224,0.04)' : '0 4px 20px rgba(0,0,0,0.2)'};
+                    transition: all 0.3s ease;
                 ">
                     <h2 style="
                         font-size: 20px; 
-                        color: ${isLightMode ? textLight : textDark}; 
+                        color: ${colors.textPrimary}; 
                         margin-bottom: 10px; 
                         display: flex; 
                         align-items: center; 
                         gap: 10px;
+                        transition: color 0.3s ease;
                     ">
-                        <i class="fas fa-info-circle" style="color: ${primary};"></i> نبذة عن الأكاديمية
-                        <span style="flex:1; height:2px; background: linear-gradient(90deg, ${primary}, transparent);"></span>
+                        <i class="fas fa-info-circle" style="color: ${colors.accent};"></i> نبذة عن الأكاديمية
+                        <span style="flex:1; height:2px; background: linear-gradient(90deg, ${colors.accent}, transparent);"></span>
                     </h2>
                     <p style="
                         font-size: 15px; 
                         line-height: 1.8; 
-                        color: ${isLightMode ? '#2D1B4E' : 'rgba(232,228,245,0.8)'};
+                        color: ${colors.textSecondary};
+                        transition: color 0.3s ease;
                     ">
-                        <strong>The Best Academy</strong> هي منصة تعليمية إلكترونية متخصصة في تدريس اللغة الإنجليزية 
+                        <strong style="color: ${colors.accent};">The Best Academy</strong> هي منصة تعليمية إلكترونية متخصصة في تدريس اللغة الإنجليزية 
                         لجميع المراحل (الابتدائية، الإعدادية، الثانوية). تم تصميم المنصة لتوفير تجربة تعليمية 
                         تفاعلية وممتعة تجمع بين المحتوى التعليمي المتميز والتقنيات الحديثة.
                     </p>
@@ -3044,66 +3438,69 @@ function renderAboutPage() {
                         margin-top: 10px; 
                         font-size: 15px; 
                         line-height: 1.8; 
-                        color: ${isLightMode ? '#2D1B4E' : 'rgba(232,228,245,0.8)'};
+                        color: ${colors.textSecondary};
+                        transition: color 0.3s ease;
                     ">
-                        تحت إشراف <strong>Ms: Amira Sobhy</strong>، صاحبة الخبرة الطويلة في تدريس اللغة الإنجليزية، 
+                        تحت إشراف <strong style="color: ${colors.accent};">Ms: Amira Sobhy</strong>، صاحبة الخبرة الطويلة في تدريس اللغة الإنجليزية، 
                         تهدف المنصة إلى تطوير مهارات الطلاب اللغوية وتعزيز ثقتهم في استخدام اللغة الإنجليزية.
                     </p>
                 </div>
 
                 <!-- Vision & Mission -->
                 <div class="about-section animate-on-scroll" style="
-                    background: ${isLightMode ? cardLight : cardDark};
+                    background: ${colors.glassBg};
                     backdrop-filter: blur(12px);
                     border-radius: 25px; 
                     padding: 22px 25px; 
                     margin: 0 12px 16px; 
-                    border: 1px solid ${isLightMode ? 'rgba(108,76,224,0.12)' : 'rgba(108,76,224,0.2)'};
-                    box-shadow: ${isLightMode ? '0 4px 20px rgba(108,76,224,0.06)' : '0 4px 20px rgba(0,0,0,0.3)'};
+                    border: 1px solid ${colors.glassBorder};
+                    box-shadow: ${isLightMode ? '0 4px 20px rgba(108,76,224,0.04)' : '0 4px 20px rgba(0,0,0,0.2)'};
+                    transition: all 0.3s ease;
                 ">
                     <h2 style="
                         font-size: 20px; 
-                        color: ${isLightMode ? textLight : textDark}; 
+                        color: ${colors.textPrimary}; 
                         margin-bottom: 12px; 
                         display: flex; 
                         align-items: center; 
                         gap: 10px;
+                        transition: color 0.3s ease;
                     ">
-                        <i class="fas fa-eye" style="color: ${primary};"></i> رؤيتنا ورسالتنا
-                        <span style="flex:1; height:2px; background: linear-gradient(90deg, ${primary}, transparent);"></span>
+                        <i class="fas fa-eye" style="color: ${colors.accent};"></i> رؤيتنا ورسالتنا
+                        <span style="flex:1; height:2px; background: linear-gradient(90deg, ${colors.accent}, transparent);"></span>
                     </h2>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
                         <div style="
-                            background: ${isLightMode ? 'rgba(108,76,224,0.05)' : 'rgba(108,76,224,0.08)'};
+                            background: ${isLightMode ? 'rgba(108,76,224,0.04)' : 'rgba(139,111,245,0.06)'};
                             border-radius: 14px; 
                             padding: 18px; 
-                            border: 1px solid ${isLightMode ? 'rgba(108,76,224,0.08)' : 'rgba(108,76,224,0.12)'};
+                            border: 1px solid ${colors.glassBorder};
                         ">
-                            <h3 style="color: ${primary}; font-size: 18px; margin-bottom: 6px;">
+                            <h3 style="color: ${colors.accent}; font-size: 18px; margin-bottom: 6px;">
                                 <i class="fas fa-bullseye"></i> رؤيتنا
                             </h3>
                             <p style="
                                 font-size: 14px; 
                                 line-height: 1.7; 
-                                color: ${isLightMode ? '#2D1B4E' : 'rgba(232,228,245,0.7)'};
+                                color: ${colors.textSecondary};
                             ">
                                 أن نكون المنصة التعليمية الرائدة في تعليم اللغة الإنجليزية، 
                                 ونصنع جيلاً واثقاً ومتمكناً من مهاراته اللغوية.
                             </p>
                         </div>
                         <div style="
-                            background: ${isLightMode ? 'rgba(108,76,224,0.05)' : 'rgba(108,76,224,0.08)'};
+                            background: ${isLightMode ? 'rgba(108,76,224,0.04)' : 'rgba(139,111,245,0.06)'};
                             border-radius: 14px; 
                             padding: 18px; 
-                            border: 1px solid ${isLightMode ? 'rgba(108,76,224,0.08)' : 'rgba(108,76,224,0.12)'};
+                            border: 1px solid ${colors.glassBorder};
                         ">
-                            <h3 style="color: ${primary}; font-size: 18px; margin-bottom: 6px;">
+                            <h3 style="color: ${colors.accent}; font-size: 18px; margin-bottom: 6px;">
                                 <i class="fas fa-rocket"></i> رسالتنا
                             </h3>
                             <p style="
                                 font-size: 14px; 
                                 line-height: 1.7; 
-                                color: ${isLightMode ? '#2D1B4E' : 'rgba(232,228,245,0.7)'};
+                                color: ${colors.textSecondary};
                             ">
                                 تقديم تعليم إنجليزي متميز باستخدام أحدث الأساليب التعليمية، 
                                 مع متابعة مستمرة لتطوير مستوى كل طالب.
@@ -3114,24 +3511,26 @@ function renderAboutPage() {
 
                 <!-- What We Offer -->
                 <div class="about-section animate-on-scroll" style="
-                    background: ${isLightMode ? cardLight : cardDark};
+                    background: ${colors.glassBg};
                     backdrop-filter: blur(12px);
                     border-radius: 25px; 
                     padding: 22px 25px; 
                     margin: 0 12px 16px; 
-                    border: 1px solid ${isLightMode ? 'rgba(108,76,224,0.12)' : 'rgba(108,76,224,0.2)'};
-                    box-shadow: ${isLightMode ? '0 4px 20px rgba(108,76,224,0.06)' : '0 4px 20px rgba(0,0,0,0.3)'};
+                    border: 1px solid ${colors.glassBorder};
+                    box-shadow: ${isLightMode ? '0 4px 20px rgba(108,76,224,0.04)' : '0 4px 20px rgba(0,0,0,0.2)'};
+                    transition: all 0.3s ease;
                 ">
                     <h2 style="
                         font-size: 20px; 
-                        color: ${isLightMode ? textLight : textDark}; 
+                        color: ${colors.textPrimary}; 
                         margin-bottom: 12px; 
                         display: flex; 
                         align-items: center; 
                         gap: 10px;
+                        transition: color 0.3s ease;
                     ">
-                        <i class="fas fa-gem" style="color: ${primary};"></i> ماذا تقدم المنصة؟
-                        <span style="flex:1; height:2px; background: linear-gradient(90deg, ${primary}, transparent);"></span>
+                        <i class="fas fa-gem" style="color: ${colors.accent};"></i> ماذا تقدم المنصة؟
+                        <span style="flex:1; height:2px; background: linear-gradient(90deg, ${colors.accent}, transparent);"></span>
                     </h2>
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:15px; margin-top:8px;">
                         ${[
@@ -3142,32 +3541,34 @@ function renderAboutPage() {
                             { icon: 'fa-chart-bar', title: 'متابعة النتائج', desc: 'تقارير مفصلة عن أداء الطلاب وتقدمهم في المادة' },
                             { icon: 'fa-star', title: 'نظام النقاط والتحفيز', desc: 'نظام تحفيزي لتشجيع الطلاب على التفوق والاجتهاد' },
                             { icon: 'fa-trophy', title: 'ترتيب الطلاب', desc: 'لوحة متابعة لترتيب الطلاب حسب النقاط والإنجازات' }
-                        ].map((item, idx) => `
-                            <div class="about-card animate-on-scroll delay-${(idx % 5) + 1}" style="
-                                background: ${isLightMode ? 'rgba(108,76,224,0.05)' : 'rgba(108,76,224,0.06)'};
+                        ].map((item) => `
+                            <div class="about-card animate-on-scroll" style="
+                                background: ${isLightMode ? 'rgba(108,76,224,0.04)' : 'rgba(139,111,245,0.04)'};
                                 backdrop-filter: blur(8px);
                                 border-radius: 14px; 
                                 padding: 18px 15px; 
                                 text-align:center; 
                                 transition: all 0.4s ease;
-                                border: 1px solid ${isLightMode ? 'rgba(108,76,224,0.08)' : 'rgba(108,76,224,0.12)'};
+                                border: 1px solid ${colors.glassBorder};
                                 cursor: default;
                             "
-                            onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(108,76,224,0.15)'"
+                            onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px ${colors.accent}15'"
                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'"
                             >
-                                <span class="icon" style="font-size: 35px; color: ${primary}; margin-bottom: 8px; display: block;">
+                                <span class="icon" style="font-size: 35px; color: ${colors.accent}; margin-bottom: 8px; display: block;">
                                     <i class="fas ${item.icon}"></i>
                                 </span>
                                 <h3 style="
                                     font-size: 16px; 
-                                    color: ${isLightMode ? textLight : textDark}; 
+                                    color: ${colors.textPrimary}; 
                                     margin-bottom: 5px;
+                                    transition: color 0.3s ease;
                                 ">${item.title}</h3>
                                 <p style="
                                     font-size: 13px; 
-                                    color: ${isLightMode ? '#4A3A6A' : 'rgba(232,228,245,0.5)'}; 
+                                    color: ${colors.textMuted}; 
                                     line-height: 1.6;
+                                    transition: color 0.3s ease;
                                 ">${item.desc}</p>
                             </div>
                         `).join('')}
@@ -3176,43 +3577,45 @@ function renderAboutPage() {
 
                 <!-- How It Works -->
                 <div class="about-section animate-on-scroll" style="
-                    background: ${isLightMode ? cardLight : cardDark};
+                    background: ${colors.glassBg};
                     backdrop-filter: blur(12px);
                     border-radius: 25px; 
                     padding: 22px 25px; 
                     margin: 0 12px 16px; 
-                    border: 1px solid ${isLightMode ? 'rgba(108,76,224,0.12)' : 'rgba(108,76,224,0.2)'};
-                    box-shadow: ${isLightMode ? '0 4px 20px rgba(108,76,224,0.06)' : '0 4px 20px rgba(0,0,0,0.3)'};
+                    border: 1px solid ${colors.glassBorder};
+                    box-shadow: ${isLightMode ? '0 4px 20px rgba(108,76,224,0.04)' : '0 4px 20px rgba(0,0,0,0.2)'};
+                    transition: all 0.3s ease;
                 ">
                     <h2 style="
                         font-size: 20px; 
-                        color: ${isLightMode ? textLight : textDark}; 
+                        color: ${colors.textPrimary}; 
                         margin-bottom: 12px; 
                         display: flex; 
                         align-items: center; 
                         gap: 10px;
+                        transition: color 0.3s ease;
                     ">
-                        <i class="fas fa-cogs" style="color: ${primary};"></i> كيف تعمل المنصة؟
-                        <span style="flex:1; height:2px; background: linear-gradient(90deg, ${primary}, transparent);"></span>
+                        <i class="fas fa-cogs" style="color: ${colors.accent};"></i> كيف تعمل المنصة؟
+                        <span style="flex:1; height:2px; background: linear-gradient(90deg, ${colors.accent}, transparent);"></span>
                     </h2>
                     <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:10px;">
                         ${['طالب', 'تسجيل الدخول', 'مشاهدة الواجبات', 'حل الأسئلة', 'الحصول على النتيجة', 'جمع النقاط', 'متابعة الترتيب'].map((step, idx) => `
-                            <div class="flow-step animate-on-scroll delay-${(idx % 5) + 1}" style="
-                                background: ${isLightMode ? 'rgba(108,76,224,0.05)' : 'rgba(108,76,224,0.06)'};
+                            <div class="flow-step animate-on-scroll" style="
+                                background: ${colors.flowBg};
                                 backdrop-filter: blur(8px);
                                 border-radius: 12px; 
                                 padding: 8px 16px; 
                                 display:flex; 
                                 align-items:center; 
                                 gap:8px; 
-                                border: 1px solid ${isLightMode ? 'rgba(108,76,224,0.08)' : 'rgba(108,76,224,0.12)'};
+                                border: 1px solid ${colors.flowBorder};
                                 transition: all 0.3s ease;
                             "
-                            onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='${primary}'"
+                            onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='${colors.accent}'"
                             onmouseout="this.style.transform='translateY(0)'"
                             >
                                 <span style="
-                                    background: ${primary}; 
+                                    background: ${colors.accent}; 
                                     color: #FFFFFF; 
                                     width: 25px; 
                                     height: 25px; 
@@ -3226,8 +3629,9 @@ function renderAboutPage() {
                                 ">${idx + 1}</span>
                                 <span style="
                                     font-size: 13px; 
-                                    color: ${isLightMode ? textLight : 'rgba(232,228,245,0.8)'}; 
+                                    color: ${colors.textPrimary}; 
                                     font-weight:500;
+                                    transition: color 0.3s ease;
                                 ">${step}</span>
                             </div>
                         `).join('')}
@@ -3235,8 +3639,9 @@ function renderAboutPage() {
                     <p style="
                         text-align:center; 
                         margin-top: 12px; 
-                        color: ${isLightMode ? '#8A7AA8' : 'rgba(232,228,245,0.3)'}; 
+                        color: ${colors.textMuted}; 
                         font-size: 13px;
+                        transition: color 0.3s ease;
                     ">
                         والبرنامج فعلًا يحتوي على هذا التدفق للطلاب والواجبات والنتائج 🚀
                     </p>
@@ -3244,52 +3649,56 @@ function renderAboutPage() {
 
                 <!-- About Teacher -->
                 <div class="about-section animate-on-scroll" style="
-                    background: ${isLightMode ? cardLight : cardDark};
+                    background: ${colors.glassBg};
                     backdrop-filter: blur(12px);
                     border-radius: 25px; 
                     padding: 22px 25px; 
                     margin: 0 12px 16px; 
-                    border: 1px solid ${isLightMode ? 'rgba(108,76,224,0.12)' : 'rgba(108,76,224,0.2)'};
-                    box-shadow: ${isLightMode ? '0 4px 20px rgba(108,76,224,0.06)' : '0 4px 20px rgba(0,0,0,0.3)'};
+                    border: 1px solid ${colors.glassBorder};
+                    box-shadow: ${isLightMode ? '0 4px 20px rgba(108,76,224,0.04)' : '0 4px 20px rgba(0,0,0,0.2)'};
+                    transition: all 0.3s ease;
                 ">
                     <h2 style="
                         font-size: 20px; 
-                        color: ${isLightMode ? textLight : textDark}; 
+                        color: ${colors.textPrimary}; 
                         margin-bottom: 12px; 
                         display: flex; 
                         align-items: center; 
                         gap: 10px;
+                        transition: color 0.3s ease;
                     ">
-                        <i class="fas fa-user-tie" style="color: ${primary};"></i> عن Ms: Amira Sobhy
-                        <span style="flex:1; height:2px; background: linear-gradient(90deg, ${primary}, transparent);"></span>
+                        <i class="fas fa-user-tie" style="color: ${colors.accent};"></i> عن Ms: Amira Sobhy
+                        <span style="flex:1; height:2px; background: linear-gradient(90deg, ${colors.accent}, transparent);"></span>
                     </h2>
                     <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:center;">
                         <div style="flex:1; min-width:120px; text-align:center;">
                             <div style="
                                 width: 100px; height: 100px; 
                                 border-radius: 50%; 
-                                background: linear-gradient(135deg, ${primary}, ${primaryDark}); 
+                                background: linear-gradient(135deg, ${colors.accent}, ${colors.accentDark}); 
                                 margin: 0 auto; 
                                 display:flex; 
                                 align-items:center; 
                                 justify-content:center; 
                                 font-size: 40px; 
                                 color: #FFFFFF; 
-                                box-shadow: 0 8px 25px rgba(108,76,224,0.2);
+                                box-shadow: 0 8px 25px ${colors.accent}20;
                             ">
                                 <i class="fas fa-chalkboard-teacher"></i>
                             </div>
                         </div>
                         <div style="flex:2; min-width:200px;">
                             <h3 style="
-                                color: ${isLightMode ? textLight : textDark}; 
+                                color: ${colors.textPrimary}; 
                                 font-size: 20px; 
                                 margin-bottom: 6px;
+                                transition: color 0.3s ease;
                             ">Ms: Amira Sobhy</h3>
                             <p style="
                                 font-size: 14px; 
                                 line-height: 1.7; 
-                                color: ${isLightMode ? '#2D1B4E' : 'rgba(232,228,245,0.7)'};
+                                color: ${colors.textSecondary};
+                                transition: color 0.3s ease;
                             ">
                                 معلمة لغة إنجليزية ذات خبرة واسعة في تدريس جميع المراحل (الابتدائية، الإعدادية، الثانوية). 
                                 تتميز بأسلوب تعليمي شيق وتفاعلي يجذب الطلاب ويحفزهم على التعلم. 
@@ -3298,31 +3707,31 @@ function renderAboutPage() {
                             </p>
                             <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
                                 <span style="
-                                    background: rgba(108,76,224,0.1); 
+                                    background: ${colors.accent}10;
                                     padding: 3px 12px; 
                                     border-radius: 20px; 
-                                    color: ${primary}; 
-                                    border: 1px solid rgba(108,76,224,0.12); 
+                                    color: ${colors.accent}; 
+                                    border: 1px solid ${colors.accent}15;
                                     font-size: 12px;
                                 ">
                                     <i class="fas fa-graduation-cap"></i> خبرة سنوات
                                 </span>
                                 <span style="
-                                    background: rgba(108,76,224,0.1); 
+                                    background: ${colors.accent}10;
                                     padding: 3px 12px; 
                                     border-radius: 20px; 
-                                    color: ${primary}; 
-                                    border: 1px solid rgba(108,76,224,0.12); 
+                                    color: ${colors.accent}; 
+                                    border: 1px solid ${colors.accent}15;
                                     font-size: 12px;
                                 ">
                                     <i class="fas fa-users"></i> جميع المراحل
                                 </span>
                                 <span style="
-                                    background: rgba(108,76,224,0.1); 
+                                    background: ${colors.accent}10;
                                     padding: 3px 12px; 
                                     border-radius: 20px; 
-                                    color: ${primary}; 
-                                    border: 1px solid rgba(108,76,224,0.12); 
+                                    color: ${colors.accent}; 
+                                    border: 1px solid ${colors.accent}15;
                                     font-size: 12px;
                                 ">
                                     <i class="fas fa-star"></i> تعليم تفاعلي
@@ -3334,24 +3743,26 @@ function renderAboutPage() {
 
                 <!-- Why The Best Academy -->
                 <div class="about-section animate-on-scroll" style="
-                    background: ${isLightMode ? cardLight : cardDark};
+                    background: ${colors.glassBg};
                     backdrop-filter: blur(12px);
                     border-radius: 25px; 
                     padding: 22px 25px; 
                     margin: 0 12px 16px; 
-                    border: 1px solid ${isLightMode ? 'rgba(108,76,224,0.12)' : 'rgba(108,76,224,0.2)'};
-                    box-shadow: ${isLightMode ? '0 4px 20px rgba(108,76,224,0.06)' : '0 4px 20px rgba(0,0,0,0.3)'};
+                    border: 1px solid ${colors.glassBorder};
+                    box-shadow: ${isLightMode ? '0 4px 20px rgba(108,76,224,0.04)' : '0 4px 20px rgba(0,0,0,0.2)'};
+                    transition: all 0.3s ease;
                 ">
                     <h2 style="
                         font-size: 20px; 
-                        color: ${isLightMode ? textLight : textDark}; 
+                        color: ${colors.textPrimary}; 
                         margin-bottom: 12px; 
                         display: flex; 
                         align-items: center; 
                         gap: 10px;
+                        transition: color 0.3s ease;
                     ">
-                        <i class="fas fa-question-circle" style="color: ${primary};"></i> لماذا The Best Academy؟
-                        <span style="flex:1; height:2px; background: linear-gradient(90deg, ${primary}, transparent);"></span>
+                        <i class="fas fa-question-circle" style="color: ${colors.accent};"></i> لماذا The Best Academy؟
+                        <span style="flex:1; height:2px; background: linear-gradient(90deg, ${colors.accent}, transparent);"></span>
                     </h2>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                         ${[
@@ -3361,25 +3772,27 @@ function renderAboutPage() {
                             { icon: 'fa-check-circle', title: 'تعليم تفاعلي', desc: 'واجبات تفاعلية وأسئلة متنوعة تجعل التعلم ممتعاً' },
                             { icon: 'fa-check-circle', title: 'سهولة الاستخدام', desc: 'واجهة بسيطة وسهلة للطلاب وأولياء الأمور' },
                             { icon: 'fa-check-circle', title: 'نتائج ملموسة', desc: 'تحسن واضح في مستوى الطلاب اللغوي مع المتابعة المستمرة' }
-                        ].map((item, idx) => `
-                            <div class="animate-on-scroll delay-${(idx % 4) + 1}" style="
-                                background: ${isLightMode ? 'rgba(108,76,224,0.04)' : 'rgba(108,76,224,0.06)'};
+                        ].map((item) => `
+                            <div class="animate-on-scroll" style="
+                                background: ${isLightMode ? 'rgba(108,76,224,0.04)' : 'rgba(139,111,245,0.04)'};
                                 backdrop-filter: blur(8px);
                                 border-radius: 12px; 
                                 padding: 14px 16px; 
-                                border-right: 3px solid ${primary};
+                                border-right: 3px solid ${colors.accent};
                             ">
                                 <h4 style="
-                                    color: ${isLightMode ? textLight : textDark}; 
+                                    color: ${colors.textPrimary}; 
                                     font-size: 15px; 
                                     margin-bottom: 4px;
+                                    transition: color 0.3s ease;
                                 ">
                                     <i class="fas ${item.icon}" style="color: #2ecc71;"></i> ${item.title}
                                 </h4>
                                 <p style="
-                                    color: ${isLightMode ? '#4A3A6A' : 'rgba(232,228,245,0.5)'}; 
+                                    color: ${colors.textSecondary}; 
                                     font-size: 13px; 
                                     line-height: 1.6;
+                                    transition: color 0.3s ease;
                                 ">${item.desc}</p>
                             </div>
                         `).join('')}
@@ -3390,16 +3803,17 @@ function renderAboutPage() {
                 <div class="cta-section animate-on-scroll" style="
                     text-align:center; 
                     padding: 30px 20px; 
-                    background: linear-gradient(135deg, ${primary}, ${primaryDark}); 
+                    background: ${colors.ctaBg}; 
                     border-radius: 30px; 
                     margin: 0 12px 20px;
-                    box-shadow: 0 8px 30px rgba(108,76,224,0.2);
+                    box-shadow: 0 8px 30px ${colors.accent}20;
+                    transition: background 0.3s ease;
                 ">
-                    <h2 style="font-size: 28px; color: #FFFFFF; margin-bottom: 8px;">🚀 ابدأ رحلتك في تعلم الإنجليزية اليوم</h2>
-                    <p style="font-size: 16px; color: rgba(255,255,255,0.85); margin-bottom: 15px;">انضم إلى The Best Academy واستمتع بتجربة تعليمية مختلفة</p>
+                    <h2 style="font-size: 28px; color: ${colors.ctaText}; margin-bottom: 8px;">🚀 ابدأ رحلتك في تعلم الإنجليزية اليوم</h2>
+                    <p style="font-size: 16px; color: ${colors.ctaText}CC; margin-bottom: 15px;">انضم إلى The Best Academy واستمتع بتجربة تعليمية مختلفة</p>
                     <button onclick="renderLoginPage()" style="
                         background: #FFFFFF; 
-                        color: ${primary}; 
+                        color: ${colors.accent}; 
                         padding: 12px 35px; 
                         border: none; 
                         border-radius: 30px; 
@@ -3417,247 +3831,345 @@ function renderAboutPage() {
 
             </div>
 
-            <!-- ===== الفوتر المضغوط ===== -->
-            <footer style="
-                padding: 8px 15px 6px;
-                position: relative;
-                z-index: 1;
-                background: ${isLightMode ? 'rgba(255,255,255,0.95)' : 'rgba(13,8,37,0.95)'};
-                backdrop-filter: blur(10px);
-                border-top: 1px solid rgba(108,76,224,0.08);
-                margin-top: 5px;
+           <!-- ===== FOOTER ===== -->
+<footer style="
+    padding: 8px 12px 6px;
+    position: relative;
+    z-index: 1;
+    background: ${colors.footerBg};
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(139,111,245,0.04);
+    margin-top: 5px;
+    transition: background 0.3s ease;
+">
+    <div style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 4px;
+        max-width: 1200px;
+        margin: 0 auto;
+    ">
+        <!-- ===== الجهة اليمنى: الأكاديمية ===== -->
+        <div style="
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1px;
+        ">
+            <span style="
+                font-size: 12px;
+                font-weight: 700;
+                color: ${colors.accent};
             ">
-                <div style="
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    flex-wrap: wrap;
-                    gap: 6px;
-                    max-width: 1200px;
-                    margin: 0 auto;
-                ">
-                    <!-- الجهة اليمنى -->
-                    <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 1px;">
-                        <span style="font-size: 13px; font-weight: 700; color: ${primary};">The Best Academy</span>
-                        <span style="font-size: 10px; color: ${isLightMode ? '#666' : 'rgba(255,255,255,0.4)'};">
-                            <i class="fas fa-chalkboard-teacher" style="color: ${primary};"></i> Ms: Amira Sobhy
-                        </span>
-                        <span style="font-size: 10px; color: ${isLightMode ? '#666' : 'rgba(255,255,255,0.4)'}; direction: ltr;">
-                            <i class="fas fa-phone" style="color: #2ecc71;"></i> 01026463211
-                        </span>
-                        <a href="https://www.facebook.com/share/p/19KmTnMPSK/" target="_blank"
-                           style="
-                               background: linear-gradient(135deg, #1877f2, #0d65d9); 
-                               color: white;
-                               padding: 3px 10px; 
-                               border-radius: 20px; 
-                               text-decoration: none;
-                               font-family: 'Cairo', sans-serif; 
-                               font-weight: 600; 
-                               font-size: 9px;
-                               transition: all 0.3s ease; 
-                               display: inline-flex; 
-                               align-items: center; 
-                               gap: 4px;
-                               margin-top: 2px; 
-                               box-shadow: 0 3px 10px rgba(24, 119, 242, 0.2);
-                           "
-                           onmouseover="this.style.transform='translateY(-2px) scale(1.03)'"
-                           onmouseout="this.style.transform='translateY(0) scale(1)'">
-                            <i class="fab fa-facebook-f" style="font-size: 10px;"></i> فيسبوك
-                        </a>
-                    </div>
+                The Best Academy
+            </span>
+            <span style="
+                font-size: 9px;
+                color: ${colors.textMuted};
+            ">
+                <i class="fas fa-chalkboard-teacher" style="color: ${colors.accent}; font-size: 8px;"></i> 
+                Ms: Amira Sobhy
+            </span>
+            <span style="
+                font-size: 9px;
+                color: ${colors.textMuted};
+                direction: ltr;
+            ">
+                <i class="fas fa-phone" style="color: #2ecc71; font-size: 8px;"></i> 
+                01026463211
+            </span>
+            <a href="https://www.facebook.com/share/p/19KmTnMPSK/" 
+               target="_blank"
+               style="
+                   background: linear-gradient(135deg, #1877f2, #0d65d9);
+                   color: white;
+                   padding: 2px 10px;
+                   border-radius: 14px;
+                   text-decoration: none;
+                   font-family: 'Cairo', sans-serif;
+                   font-weight: 600;
+                   font-size: 8px;
+                   transition: all 0.3s ease;
+                   display: inline-flex;
+                   align-items: center;
+                   gap: 4px;
+                   margin-top: 2px;
+                   box-shadow: 0 2px 8px rgba(24, 119, 242, 0.2);
+               "
+               onmouseover="this.style.transform='translateY(-1px) scale(1.03)'"
+               onmouseout="this.style.transform='translateY(0) scale(1)'">
+                <i class="fab fa-facebook-f" style="font-size: 8px;"></i> 
+                فيسبوك
+            </a>
+        </div>
 
-                    <!-- الجهة اليسرى -->
-                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
-                        <span style="font-size: 12px; font-weight: 700; color: ${isLightMode ? textLight : textDark};">
-                            <span style="color: ${primary};">Tecno</span> 
-                            <span style="color: ${isLightMode ? textLight : textDark};">Shark</span>
-                            <span style="color: ${primary}; font-size: 8px;">™</span>
-                        </span>
-                        <a href="https://tecno-shark.vercel.app" target="_blank"
-                           style="
-                               background: linear-gradient(135deg, ${primary}, ${primaryDark}); 
-                               color: #FFFFFF;
-                               padding: 3px 10px; 
-                               border-radius: 20px; 
-                               text-decoration: none;
-                               font-family: 'Cairo', sans-serif; 
-                               font-weight: 600; 
-                               font-size: 9px;
-                               transition: all 0.3s ease; 
-                               display: inline-flex; 
-                               align-items: center; 
-                               gap: 4px;
-                               box-shadow: 0 3px 10px rgba(108,76,224,0.15);
-                           "
-                           onmouseover="this.style.transform='translateY(-2px) scale(1.03)'"
-                           onmouseout="this.style.transform='translateY(0) scale(1)'">
-                            <i class="fas fa-globe" style="font-size: 10px;"></i> موقع الشركة
-                        </a>
-                        <span style="color: ${isLightMode ? '#bbb' : 'rgba(255,255,255,0.1)'}; font-size: 7px;">
-                            <i class="fas fa-code" style="color: ${primary};"></i> Developed by Tecno Shark
-                        </span>
-                    </div>
-                </div>
+        <!-- ===== الجهة اليسرى: Tecno Shark ===== -->
+        <div style="
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 1px;
+        ">
+            <span style="
+                font-size: 11px;
+                font-weight: 700;
+                color: ${colors.textPrimary};
+            ">
+                <span style="color: ${colors.accent};">Tecno</span> 
+                <span style="color: ${colors.textPrimary};">Shark</span>
+                <span style="color: ${colors.accent}; font-size: 7px;">™</span>
+            </span>
+            <a href="https://tecno-shark.vercel.app" 
+               target="_blank"
+               style="
+                   background: linear-gradient(135deg, ${colors.accent}, ${isLightMode ? '#4A2F9E' : '#6C4CE0'});
+                   color: #FFFFFF;
+                   padding: 2px 10px;
+                   border-radius: 14px;
+                   text-decoration: none;
+                   font-family: 'Cairo', sans-serif;
+                   font-weight: 600;
+                   font-size: 8px;
+                   transition: all 0.3s ease;
+                   display: inline-flex;
+                   align-items: center;
+                   gap: 4px;
+                   box-shadow: 0 2px 8px ${colors.accent}15;
+               "
+               onmouseover="this.style.transform='translateY(-1px) scale(1.03)'"
+               onmouseout="this.style.transform='translateY(0) scale(1)'">
+                <i class="fas fa-globe" style="font-size: 8px;"></i> 
+                موقع الشركة
+            </a>
+            <span style="
+                color: ${colors.textMuted};
+                font-size: 7px;
+            ">
+                <i class="fas fa-code" style="color: ${colors.accent}; font-size: 6px;"></i> 
+                Developed by Tecno Shark
+            </span>
+        </div>
+    </div>
 
-                <!-- خط فاصل رفيع -->
-                <div style="
-                    height: 1px; 
-                    background: linear-gradient(90deg, transparent, rgba(108,76,224,0.08), transparent); 
-                    margin: 5px auto 4px; 
-                    max-width: 90%;
-                "></div>
-                
-                <!-- حقوق النشر -->
-                <div style="
-                    text-align: center; 
-                    color: ${isLightMode ? '#bbb' : 'rgba(255,255,255,0.08)'}; 
-                    font-size: 7px;
-                ">
-                    <p>© 2025 جميع الحقوق محفوظة | 
-                        <span style="color: ${primary}; font-weight: 600;">The Best Academy</span> 
-                        | <span style="color: ${isLightMode ? '#999' : 'rgba(255,255,255,0.15)'};">Ms: Amira Sobhy</span>
-                    </p>
-                </div>
-            </footer>
+    <!-- ===== خط فاصل ===== -->
+    <div style="
+        height: 1px;
+        background: linear-gradient(90deg, transparent, ${colors.accent}10, transparent);
+        margin: 4px auto 3px;
+        max-width: 90%;
+    "></div>
+    
+    <!-- ===== حقوق النشر ===== -->
+    <div style="
+        text-align: center;
+        color: ${colors.textMuted};
+        font-size: 7px;
+    ">
+        <p>© 2025 جميع الحقوق محفوظة | 
+            <span style="color: ${colors.accent}; font-weight: 600;">The Best Academy</span> 
+            | <span style="color: ${colors.textMuted};">Ms: Amira Sobhy</span>
+        </p>
+    </div>
+</footer>
         </div>
     `;
     
     // تفعيل أنيميشن السكرول
     initScrollAnimations();
+    initTheme();
 }
 
-      function toggleTheme() {
+function toggleTheme() {
     const body = document.body;
-    const themeBtn = document.getElementById('themeToggleBtn');
     
+    // تبديل الوضع
     if (body.classList.contains('light-mode')) {
         body.classList.remove('light-mode');
         localStorage.setItem('theme', 'dark');
-        if (themeBtn) {
-            themeBtn.innerHTML = '<i class="fas fa-moon"></i>';
-            themeBtn.title = 'الوضع الليلي';
-        }
     } else {
         body.classList.add('light-mode');
         localStorage.setItem('theme', 'light');
-        if (themeBtn) {
-            themeBtn.innerHTML = '<i class="fas fa-sun"></i>';
-            themeBtn.title = 'الوضع النهاري';
+    }
+    
+    // ====== تحديث الألوان فوراً ======
+    updateThemeColors();
+    
+    // ====== تحديث جميع أزرار الثيم في الصفحة ======
+    document.querySelectorAll('#themeToggleBtn, #landingThemeBtn, .theme-toggle-btn').forEach(btn => {
+        if (body.classList.contains('light-mode')) {
+            btn.innerHTML = '<i class="fas fa-sun"></i>';
+            btn.title = 'الوضع النهاري';
+        } else {
+            btn.innerHTML = '<i class="fas fa-moon"></i>';
+            btn.title = 'الوضع الليلي';
+        }
+    });
+    
+    // ====== تحديث الصفحة الحالية في مكانها (من غير تنقل) ======
+    const currentPage = document.querySelector('.sidebar-menu li.active')?.dataset?.page;
+    
+    if (isAdmin && currentPage) {
+        // لو Admin - نحدث الصفحة الحالية
+        changeAdminPage(currentPage);
+    } else if (currentUser && currentPage) {
+        // لو Student - نحدث الصفحة الحالية
+        changeStudentPage(currentPage);
+    } else {
+        // لو Landing Page أو About Page أو Login Page
+        // نحدد الصفحة بناءً على المحتوى الحالي
+        const isAboutPage = document.querySelector('.about-page');
+        const isLoginPage = document.querySelector('.login-card');
+        const isLandingPage = document.querySelector('.landing-hero');
+        
+        if (isAboutPage) {
+            renderAboutPage();
+        } else if (isLoginPage) {
+            renderLoginPage(); // ← هنفضل في صفحة تسجيل الدخول!
+        } else if (isLandingPage) {
+            renderLandingPage();
+        } else {
+            // لو مش عارفين، نرجع للاندينج
+            renderLandingPage();
         }
     }
     
-    // تطبيق الألوان الجديدة
-    updateThemeColors();
+    // إظهار رسالة تأكيد
+    const mode = body.classList.contains('light-mode') ? 'النهاري ☀️' : 'الليلي 🌙';
+    showToast(`تم التبديل إلى الوضع ${mode}`, 'info');
 }
 
 function updateThemeColors() {
     const isLightMode = document.body.classList.contains('light-mode');
     
-    // الألوان الأساسية
-    const primary = '#6C4CE0';
-    const primaryLight = '#8B6FF5';
-    const primaryDark = '#4A2F9E';
-    const bgLight = '#F0EEFF';
-    const bgDark = '#0D0825';
-    const textLight = '#1A1035';
-    const textDark = '#E8E4F5';
-    const cardLight = 'rgba(255,255,255,0.7)';
-    const cardDark = 'rgba(26,16,64,0.7)';
+    // ألوان الوضع النهاري
+    const lightColors = {
+        bg: '#f5f0ff',
+        bgGradient: 'linear-gradient(135deg, #f5f0ff, #e8e0f5, #f0ecff)',
+        text: '#2D1B4E',
+        textSecondary: 'rgba(45, 27, 78, 0.6)',
+        textMuted: 'rgba(45, 27, 78, 0.35)',
+        accent: '#6C4CE0',
+        accentLight: '#8B6FF5',
+        glassBg: 'rgba(255, 255, 255, 0.2)',
+        glassBorder: 'rgba(255, 255, 255, 0.3)',
+        glassShadow: '0 8px 32px rgba(0, 0, 0, 0.06)',
+        cardBg: 'rgba(255, 255, 255, 0.25)',
+        sidebarBg: 'linear-gradient(180deg, #ffffff, #f5f0ff)',
+        sidebarBorder: 'rgba(108,76,224,0.1)',
+        footerBg: 'rgba(255,255,255,0.15)',
+        statIconBg: 'rgba(108,76,224,0.12)',
+        hamburgerBg: 'rgba(255,255,255,0.85)',
+        hamburgerColor: '#6C4CE0',
+        badgeBg: 'linear-gradient(135deg, #6C4CE0, #8B6FF5)',
+        badgeText: '#ffffff',
+        rankMeBg: 'rgba(108,76,224,0.08)',
+        rankMeColor: '#6C4CE0',
+        tableHeaderBg: 'rgba(108,76,224,0.06)',
+        borderColor: 'rgba(108,76,224,0.08)',
+    };
     
-    // تطبيق على العناصر
-    document.documentElement.style.setProperty('--primary-color', primary);
-    document.documentElement.style.setProperty('--primary-light', primaryLight);
-    document.documentElement.style.setProperty('--primary-dark', primaryDark);
+    // ألوان الوضع الليلي
+    const darkColors = {
+        bg: '#0a0a1a',
+        bgGradient: 'linear-gradient(135deg, #0a0a1a, #1a1040, #0d0825)',
+        text: '#E8E4F5',
+        textSecondary: 'rgba(232, 228, 245, 0.6)',
+        textMuted: 'rgba(232, 228, 245, 0.35)',
+        accent: '#8B6FF5',
+        accentLight: '#A88BFF',
+        glassBg: 'rgba(255, 255, 255, 0.06)',
+        glassBorder: 'rgba(255, 255, 255, 0.08)',
+        glassShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+        cardBg: 'rgba(255, 255, 255, 0.04)',
+        sidebarBg: 'linear-gradient(180deg, #0d0825, #1a1040)',
+        sidebarBorder: 'rgba(139,111,245,0.1)',
+        footerBg: 'rgba(255,255,255,0.04)',
+        statIconBg: 'rgba(139,111,245,0.15)',
+        hamburgerBg: 'rgba(13,8,37,0.9)',
+        hamburgerColor: '#8B6FF5',
+        badgeBg: 'linear-gradient(135deg, #8B6FF5, #6C4CE0)',
+        badgeText: '#ffffff',
+        rankMeBg: 'rgba(139,111,245,0.12)',
+        rankMeColor: '#8B6FF5',
+        tableHeaderBg: 'rgba(139,111,245,0.08)',
+        borderColor: 'rgba(139,111,245,0.12)',
+    };
     
-    // تحديث خلفية الصفحة
-    document.body.style.background = isLightMode ? bgLight : bgDark;
-    document.body.style.color = isLightMode ? textLight : textDark;
+    const colors = isLightMode ? lightColors : darkColors;
     
-    // ===== تحديث السايدبار (القائمة الجانبية) =====
+    // ====== تطبيق الألوان على الصفحة ======
+    // خلفية الصفحة الرئيسية
+    document.body.style.background = colors.bg;
+    document.body.style.color = colors.text;
+    
+    // السايدبار
     const sidebar = document.getElementById('sidebar');
     if (sidebar) {
-        if (isLightMode) {
-            sidebar.style.background = 'linear-gradient(180deg, #F0EEFF, #E8E4F5)';
-        } else {
-            sidebar.style.background = 'linear-gradient(180deg, #0D0825, #1A1040)';
-        }
+        sidebar.style.background = colors.sidebarBg;
+        sidebar.style.borderColor = colors.sidebarBorder;
     }
     
-    // ===== تحديث عناصر القائمة في السايدبار =====
-    document.querySelectorAll('.sidebar-menu li a').forEach(el => {
-        if (el) {
-            if (isLightMode) {
-                el.style.color = '#1A1035';
-            } else {
-                el.style.color = '#FFFFFF';  // في الوضع الليلي: النص أبيض
-            }
-        }
-    });
-    
-    // ===== تحديث العنصر النشط في السايدبار =====
-    document.querySelectorAll('.sidebar-menu li.active a').forEach(el => {
-        if (el) {
-            el.style.background = 'linear-gradient(90deg, #6C4CE0, #4A2F9E)';
-            el.style.color = '#FFFFFF';
-        }
-    });
-    
-    // ===== تحديث عنوان السايدبار =====
+    // عناصر السايدبار
     document.querySelectorAll('.sidebar-header h3').forEach(el => {
-        if (el) {
-            el.style.color = isLightMode ? '#1A1035' : '#8B6FF5';
-        }
+        el.style.color = colors.text;
     });
-    
     document.querySelectorAll('.sidebar-header p').forEach(el => {
-        if (el) {
-            el.style.color = isLightMode ? '#8A7AA8' : 'rgba(255,255,255,0.4)';
-        }
+        el.style.color = colors.textSecondary;
     });
-    
-    // ===== تحديث أيقونات السايدبار =====
+    document.querySelectorAll('.sidebar-menu li a').forEach(el => {
+        el.style.color = colors.text;
+    });
     document.querySelectorAll('.sidebar-menu li a i').forEach(el => {
-        if (el) {
-            el.style.color = isLightMode ? '#6C4CE0' : '#8B6FF5';
+        el.style.color = colors.accent;
+    });
+    
+    // العنصر النشط في السايدبار
+    document.querySelectorAll('.sidebar-menu li.active a').forEach(el => {
+        el.style.background = colors.badgeBg;
+        el.style.color = colors.badgeText;
+    });
+    document.querySelectorAll('.sidebar-menu li.active a i').forEach(el => {
+        el.style.color = colors.badgeText;
+    });
+    
+    // خلفية المين كونتنر
+    document.querySelectorAll('[style*="min-height: 100vh"]').forEach(el => {
+        if (el.style.background) {
+            el.style.background = colors.bgGradient;
         }
     });
     
-    // ===== تحديث العنصر الأخير (تسجيل الخروج) =====
-    document.querySelectorAll('.sidebar-menu li:last-child a, .sidebar-menu li:last-child a i').forEach(el => {
-        if (el) {
-            el.style.color = '#e74c3c';
+    // الهيدر
+    document.querySelectorAll('.header, [style*="backdrop-filter: blur(20px)"]').forEach(el => {
+        if (el.style.background && el.style.background.includes('rgba')) {
+            el.style.background = colors.glassBg;
+            el.style.borderColor = colors.glassBorder;
         }
     });
     
-    // ===== تحديث خلفية الهيدر =====
-    document.querySelectorAll('header, .header, .landing-header, .about-nav').forEach(el => {
-        if (el) {
-            el.style.background = isLightMode ? 'rgba(255,255,255,0.95)' : 'rgba(13,8,37,0.95)';
+    // البطاقات
+    document.querySelectorAll('[style*="border-radius: 18px"], [style*="border-radius: 20px"]').forEach(el => {
+        if (el.style.background && el.style.background.includes('rgba')) {
+            el.style.background = colors.glassBg;
+            el.style.borderColor = colors.glassBorder;
         }
     });
     
-    // ===== تحديث الفوتر =====
-    document.querySelectorAll('footer, .footer, .landing-footer').forEach(el => {
-        if (el) {
-            el.style.background = isLightMode ? 'rgba(255,255,255,0.95)' : 'rgba(13,8,37,0.95)';
-        }
+    // الفوتر
+    document.querySelectorAll('.footer').forEach(el => {
+        el.style.background = colors.footerBg;
+        el.style.color = colors.textSecondary;
+        el.style.borderColor = colors.glassBorder;
     });
     
-    // ===== تحديث الأزرار =====
-    document.querySelectorAll('.btn-primary, .btn-header-login, .btn-landing-primary, .login-btn, .btn-success, .btn-header-join, .btn-success-landing').forEach(el => {
-        if (el) {
-            el.style.background = `linear-gradient(135deg, ${primary}, ${primaryDark})`;
-            el.style.color = '#FFFFFF';
-        }
-    });
-    
-    // ===== تحديث زر الثيم =====
+    // تحديث زر الثيم
     const themeBtn = document.getElementById('themeToggleBtn');
     if (themeBtn) {
-        themeBtn.style.borderColor = primary;
-        themeBtn.style.color = primary;
+        themeBtn.style.borderColor = colors.accent;
+        themeBtn.style.color = colors.accent;
+        themeBtn.style.background = isLightMode ? 'rgba(108,76,224,0.08)' : 'rgba(139,111,245,0.12)';
         if (isLightMode) {
             themeBtn.innerHTML = '<i class="fas fa-sun"></i>';
             themeBtn.title = 'الوضع النهاري';
@@ -3666,6 +4178,20 @@ function updateThemeColors() {
             themeBtn.title = 'الوضع الليلي';
         }
     }
+    
+    // تحديث الشعار
+    document.querySelectorAll('[style*="color: #e8b931"]').forEach(el => {
+        if (el.tagName === 'H1' || el.tagName === 'H3' || el.tagName === 'SPAN') {
+            el.style.color = colors.accent;
+        }
+    });
+    
+    // تحديث النصوص الرئيسية
+    document.querySelectorAll('[style*="font-weight: 800"]').forEach(el => {
+        if (!el.style.color || el.style.color === '#e8b931') {
+            el.style.color = colors.text;
+        }
+    });
 }
 
 
@@ -3863,102 +4389,358 @@ function addThemeStyles() {
     document.head.appendChild(style);
 }
 
-      // ==================== LOGIN PAGE ====================
-function renderLoginPage() {
+     function renderLoginPage() {
     const app = document.getElementById('app');
+    const isLightMode = document.body.classList.contains('light-mode');
+    
+    // ====== ألوان حسب الوضع ======
+    let colors;
+    if (isLightMode) {
+        colors = {
+            bg: '#f5f0ff',
+            bgGradient: 'linear-gradient(135deg, #f5f0ff, #e8e0f5, #f0ecff)',
+            textPrimary: '#2D1B4E',
+            textSecondary: 'rgba(45, 27, 78, 0.6)',
+            textMuted: 'rgba(45, 27, 78, 0.35)',
+            accent: '#6C4CE0',
+            accentDark: '#4A2F9E',
+            cardBg: 'rgba(255, 255, 255, 0.85)',
+            cardBorder: 'rgba(108,76,224,0.12)',
+            inputBg: 'rgba(255,255,255,0.9)',
+            inputBorder: 'rgba(108,76,224,0.15)',
+            inputText: '#2D1B4E',
+            inputPlaceholder: 'rgba(45,27,78,0.3)',
+            waveColor: 'rgba(108,76,224,0.04)',
+            btnBg: 'linear-gradient(135deg, #6C4CE0, #4A2F9E)',
+            btnText: '#FFFFFF',
+        };
+    } else {
+        colors = {
+            bg: '#0a0a1a',
+            bgGradient: 'linear-gradient(135deg, #0a0a1a, #1a1040, #0d0825)',
+            textPrimary: '#E8E4F5',
+            textSecondary: 'rgba(232, 228, 245, 0.6)',
+            textMuted: 'rgba(232, 228, 245, 0.3)',
+            accent: '#8B6FF5',
+            accentDark: '#6C4CE0',
+            cardBg: 'rgba(10, 22, 40, 0.85)',
+            cardBorder: 'rgba(139,111,245,0.12)',
+            inputBg: 'rgba(255,255,255,0.05)',
+            inputBorder: 'rgba(139,111,245,0.12)',
+            inputText: '#E8E4F5',
+            inputPlaceholder: 'rgba(232,228,245,0.2)',
+            waveColor: 'rgba(139,111,245,0.04)',
+            btnBg: 'linear-gradient(135deg, #8B6FF5, #6C4CE0)',
+            btnText: '#FFFFFF',
+        };
+    }
+    
     app.innerHTML = `
-        <div class="login-wrapper">
+        <div class="login-wrapper" style="
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: ${colors.bgGradient};
+            position: relative;
+            overflow: hidden;
+            transition: background 0.3s ease;
+        ">
             <!-- Background Particles -->
-            <div class="particles-bg" id="loginParticles"></div>
+            <div class="particles-bg" id="loginParticles" style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                overflow: hidden;
+                z-index: 0;
+            "></div>
             
             <!-- Waves -->
-            <div class="wave-bg">
-                <div class="wave"></div>
-                <div class="wave wave2"></div>
+            <div class="wave-bg" style="position: absolute; bottom: 0; left: 0; width: 100%; z-index: 0;">
+                <div class="wave" style="
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 120px;
+                    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3E%3Cpath d='M800 56.9c-155.5 0-204.9-50-405.5-46.1-200.5 3.9-293.1 52.9-394.5 46.1V88.7h800V56.9z' fill='${colors.accent}' opacity='0.04'/%3E%3C/svg%3E") repeat-x;
+                    background-size: 800px 100px;
+                    animation: waveMove 12s linear infinite;
+                "></div>
+                <div class="wave wave2" style="
+                    position: absolute;
+                    bottom: 20px;
+                    left: 0;
+                    width: 100%;
+                    height: 120px;
+                    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3E%3Cpath d='M800 56.9c-155.5 0-204.9-50-405.5-46.1-200.5 3.9-293.1 52.9-394.5 46.1V88.7h800V56.9z' fill='${colors.accent}' opacity='0.02'/%3E%3C/svg%3E") repeat-x;
+                    background-size: 800px 100px;
+                    animation: waveMove 15s linear infinite reverse;
+                "></div>
             </div>
 
-            <!-- Top Buttons -->
-            <div class="login-top-buttons">
-                <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleTheme()" title="تغيير الوضع" style="width:40px; height:40px; border-radius:50%; border:2px solid #e8b931; background:rgba(255,255,255,0.05); color:#e8b931; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.3s ease; font-size:18px;">
-                    <i class="fas ${document.body.classList.contains('light-mode') ? 'fa-sun' : 'fa-moon'}"></i>
+            <!-- ===== TOP BUTTONS ===== -->
+            <div class="login-top-buttons" style="
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                z-index: 100;
+                display: flex;
+                justify-content: flex-end;
+                gap: 6px;
+                flex-wrap: wrap;
+            ">
+                <!-- زر الثيم -->
+                <button id="themeToggleBtn" 
+                        onclick="toggleTheme()" 
+                        style="
+                            width: 32px; 
+                            height: 32px; 
+                            border-radius: 50%; 
+                            border: 1.5px solid ${colors.accent}; 
+                            background: ${isLightMode ? 'rgba(108,76,224,0.08)' : 'rgba(139,111,245,0.12)'};
+                            color: ${colors.accent}; 
+                            cursor: pointer; 
+                            display: flex; 
+                            align-items: center; 
+                            justify-content: center; 
+                            transition: all 0.3s ease; 
+                            font-size: 13px;
+                            font-family: 'Cairo', sans-serif;
+                            padding: 0;
+                            flex-shrink: 0;
+                        "
+                        title="تغيير الوضع">
+                    <i class="fas ${isLightMode ? 'fa-sun' : 'fa-moon'}"></i>
                 </button>
-                <button class="btn-top btn-top-join" onclick="showJoinRequestModal()">
-                    <i class="fas fa-user-plus"></i> إرسال طلب انضمام
+
+                <!-- زر طلب انضمام -->
+                <button class="btn-top btn-top-join" onclick="showJoinRequestModal()" style="
+                    padding: 4px 12px;
+                    border-radius: 20px;
+                    font-family: 'Cairo', sans-serif;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    border: none;
+                    font-size: 11px;
+                    white-space: nowrap;
+                    background: linear-gradient(135deg, #2ecc71, #27ae60);
+                    color: #0a1628;
+                    box-shadow: 0 2px 10px rgba(46, 204, 113, 0.2);
+                "
+                onmouseover="this.style.transform='translateY(-1px) scale(1.03)'"
+                onmouseout="this.style.transform='translateY(0) scale(1)'">
+                    <i class="fas fa-user-plus" style="font-size: 10px;"></i> طلب انضمام
                 </button>
-                <button class="btn-top btn-top-home" onclick="renderLandingPage()">
-                    <i class="fas fa-home"></i> الرئيسية
+
+                <!-- زر الرئيسية -->
+                <button class="btn-top btn-top-home" onclick="renderLandingPage()" style="
+                    padding: 4px 12px;
+                    border-radius: 20px;
+                    font-family: 'Cairo', sans-serif;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    border: none;
+                    font-size: 11px;
+                    white-space: nowrap;
+                    background: linear-gradient(135deg, ${colors.accent}, ${colors.accentDark});
+                    color: #FFFFFF;
+                    box-shadow: 0 2px 10px ${colors.accent}20;
+                "
+                onmouseover="this.style.transform='translateY(-1px) scale(1.03)'"
+                onmouseout="this.style.transform='translateY(0) scale(1)'">
+                    <i class="fas fa-home" style="font-size: 10px;"></i> الرئيسية
                 </button>
             </div>
 
-            <div class="login-card" >
-                <div class="login-logo">
-                    <img src="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png" alt="The Best Academy">
+            <!-- ===== LOGIN CARD ===== -->
+            <div class="login-card" style="
+                background: ${colors.cardBg};
+                backdrop-filter: blur(20px);
+                border-radius: 48px;
+                width: 100%;
+                max-width: 450px;
+                padding: 40px 35px 35px;
+                border: 1px solid ${colors.cardBorder};
+                box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+                position: relative;
+                z-index: 2;
+                animation: fadeInUp 0.6s ease;
+                transition: all 0.3s ease;
+            ">
+                <div class="login-logo" style="
+                    width: 90px;
+                    height: 90px;
+                    margin: 0 auto 15px;
+                    border-radius: 50%;
+                    overflow: hidden;
+                    border: 3px solid ${colors.accent};
+                    box-shadow: 0 0 30px ${colors.accent}15;
+                ">
+                    <img src="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png" alt="The Best Academy" style="width:100%; height:100%; object-fit:cover;">
                 </div>
-                <h2 class="login-title">مرحباً بك في</h2>
-                <h1 class="login-subtitle">The Best <span>Academy</span></h1>
-                <p class="login-teacher"><i class="fas fa-chalkboard-teacher"></i> Ms: Amira Sobhy</p>
-                <p class="login-desc">منصة التعليم الإلكتروني</p>
+                <h2 class="login-title" style="
+                    font-size: 14px;
+                    color: ${colors.textMuted};
+                    text-align: center;
+                ">مرحباً بك في</h2>
+                <h1 class="login-subtitle" style="
+                    font-size: 26px;
+                    color: ${colors.textPrimary};
+                    text-align: center;
+                    font-weight: 800;
+                ">
+                    The Best <span style="color: ${colors.accent};">Academy</span>
+                </h1>
+                <p class="login-teacher" style="
+                    text-align: center;
+                    font-size: 16px;
+                    color: ${colors.textSecondary};
+                    margin-bottom: 20px;
+                ">
+                    <i class="fas fa-chalkboard-teacher" style="color: ${colors.accent}; margin-left: 5px;"></i> 
+                    Ms: Amira Sobhy
+                </p>
+                <p class="login-desc" style="
+                    text-align: center;
+                    font-size: 12px;
+                    color: ${colors.textMuted};
+                    border-top: 1px solid ${colors.cardBorder};
+                    padding-top: 12px;
+                    display: inline-block;
+                    width: 100%;
+                ">منصة التعليم الإلكتروني</p>
 
                 <form id="loginForm">
-                    <div class="input-field">
-                        <i class="fas fa-user input-icon"></i>
-                        <input type="text" id="loginUsername" placeholder="اسم المستخدم" required>
+                    <div class="input-field" style="position: relative; margin-bottom: 20px;">
+                        <i class="fas fa-user input-icon" style="
+                            position: absolute;
+                            right: 16px;
+                            top: 50%;
+                            transform: translateY(-50%);
+                            color: ${colors.accent};
+                            font-size: 18px;
+                            z-index: 1;
+                        "></i>
+                        <input type="text" id="loginUsername" placeholder="اسم المستخدم" required style="
+                            width: 100%;
+                            padding: 15px 50px 15px 20px;
+                            border: 2px solid ${colors.inputBorder};
+                            border-radius: 60px;
+                            font-size: 15px;
+                            font-family: 'Cairo', sans-serif;
+                            background: ${colors.inputBg};
+                            color: ${colors.inputText};
+                            transition: all 0.3s ease;
+                            outline: none;
+                        " onfocus="this.style.borderColor='${colors.accent}'; this.style.boxShadow='0 0 0 3px ${colors.accent}10'" 
+                        onblur="this.style.borderColor='${colors.inputBorder}'; this.style.boxShadow='none'">
                     </div>
-                    <div class="input-field">
-                        <i class="fas fa-lock input-icon"></i>
-                        <input type="password" id="loginPassword" placeholder="كلمة المرور" required>
-                        <i class="fas fa-eye-slash password-toggle" id="togglePassword"></i>
+                    <div class="input-field" style="position: relative; margin-bottom: 20px;">
+                        <i class="fas fa-lock input-icon" style="
+                            position: absolute;
+                            right: 16px;
+                            top: 50%;
+                            transform: translateY(-50%);
+                            color: ${colors.accent};
+                            font-size: 18px;
+                            z-index: 1;
+                        "></i>
+                        <input type="password" id="loginPassword" placeholder="كلمة المرور" required style="
+                            width: 100%;
+                            padding: 15px 50px 15px 20px;
+                            border: 2px solid ${colors.inputBorder};
+                            border-radius: 60px;
+                            font-size: 15px;
+                            font-family: 'Cairo', sans-serif;
+                            background: ${colors.inputBg};
+                            color: ${colors.inputText};
+                            transition: all 0.3s ease;
+                            outline: none;
+                        " onfocus="this.style.borderColor='${colors.accent}'; this.style.boxShadow='0 0 0 3px ${colors.accent}10'" 
+                        onblur="this.style.borderColor='${colors.inputBorder}'; this.style.boxShadow='none'">
+                        <i class="fas fa-eye-slash password-toggle" id="togglePassword" style="
+                            position: absolute;
+                            left: 18px;
+                            top: 50%;
+                            transform: translateY(-50%);
+                            cursor: pointer;
+                            color: ${colors.textMuted};
+                            font-size: 16px;
+                            transition: 0.2s;
+                        " onmouseover="this.style.color='${colors.accent}'" onmouseout="this.style.color='${colors.textMuted}'"></i>
                     </div>
-                    <button type="submit" class="login-btn">
+                    <button type="submit" class="login-btn" style="
+                        width: 100%;
+                        background: ${colors.btnBg};
+                        border: none;
+                        padding: 15px;
+                        border-radius: 60px;
+                        color: ${colors.btnText};
+                        font-size: 18px;
+                        font-weight: 700;
+                        font-family: 'Cairo', sans-serif;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 5px 25px ${colors.accent}20;
+                    " onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 35px ${colors.accent}30'" 
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 25px ${colors.accent}20'">
                         <i class="fas fa-sign-in-alt"></i> دخول
                     </button>
                 </form>
 
-               <div class="login-footer" style="
-    background: transparent !important;
-    padding: 15px 0 0 0;
-    margin-top: 10px;
-    border-top: 1px solid rgba(232,185,49,0.08);
-">
-    <div class="footer-divider" style="
-        width: 50px;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #e8b931, transparent);
-        margin: 0 auto 12px;
-    "></div>
-    <div class="footer-brand" style="
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-    ">
-        <i class="fas fa-laptop-code" style="color: #e8b931; font-size: 14px;"></i>
-        <span style="
-            font-size: 12px;
-            font-weight: 600;
-            color: rgba(255,255,255,0.4);
-        ">The Best Academy</span>
-    </div>
-    <div style="
-        font-size: 11px;
-        color: rgba(255,255,255,0.25);
-        margin-top: 5px;
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        flex-wrap: wrap;
-    ">
-        <span><i class="fas fa-phone-alt" style="color: #e8b931;"></i> 01026463211</span>
-        <span><i class="fas fa-phone-alt" style="color: #e8b931;"></i> 01152569015</span>
-    </div>
-</div>
+                <div class="login-footer" style="
+                    background: transparent !important;
+                    padding: 15px 0 0 0;
+                    margin-top: 10px;
+                    border-top: 1px solid ${colors.cardBorder};
+                ">
+                    <div class="footer-divider" style="
+                        width: 50px;
+                        height: 2px;
+                        background: linear-gradient(90deg, transparent, ${colors.accent}, transparent);
+                        margin: 0 auto 12px;
+                    "></div>
+                    <div class="footer-brand" style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 8px;
+                    ">
+                        <i class="fas fa-laptop-code" style="color: ${colors.accent}; font-size: 14px;"></i>
+                        <span style="
+                            font-size: 12px;
+                            font-weight: 600;
+                            color: ${colors.textMuted};
+                        ">The Best Academy</span>
+                    </div>
+                    <div style="
+                        font-size: 11px;
+                        color: ${colors.textMuted};
+                        margin-top: 5px;
+                        display: flex;
+                        justify-content: center;
+                        gap: 15px;
+                        flex-wrap: wrap;
+                    ">
+                        <span><i class="fas fa-phone-alt" style="color: ${colors.accent};"></i> 01026463211</span>
+                        <span><i class="fas fa-phone-alt" style="color: ${colors.accent};"></i> 01152569015</span>
+                    </div>
+                </div>
+            </div>
         </div>
     `;
 
-    
     createParticlesBg('#loginParticles');
 
-   
+    // ====== Toggle Password ======
     document.getElementById('togglePassword').addEventListener('click', function() {
         const input = document.getElementById('loginPassword');
         if (input.type === 'password') {
@@ -3972,12 +4754,13 @@ function renderLoginPage() {
         }
     });
 
+    // ====== Login Form ======
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.getElementById('loginUsername').value.replace(/\s/g, '');
         const password = document.getElementById('loginPassword').value.trim();
 
-        // ========== ADMIN LOGIN ==========
+        // ADMIN LOGIN
         if (username === 'admin' && password === 'admin123') {
             currentUser = { id: 'admin', name: 'المدير', isAdmin: true };
             isAdmin = true;
@@ -3986,22 +4769,18 @@ function renderLoginPage() {
             return;
         }
 
-        // ========== STUDENT LOGIN ==========
+        // STUDENT LOGIN
         const student = appData.students.find(s => s.username.replace(/\s/g, '') === username && s.password === password);
         
         if (student) {
-            // ====== التحقق من حالة الطالب ======
             if (student.status === 'pending') {
                 showToast('⚠️ طلبك قيد المراجعة، يرجى الانتظار حتى يتم الموافقة عليه من قبل المدير', 'warning');
                 return;
             }
-            
             if (student.status === 'rejected') {
                 showToast('❌ تم رفض طلبك، يرجى التواصل مع المدير', 'error');
                 return;
             }
-            
-            // ====== الطالب نشط ======
             currentUser = student;
             isAdmin = false;
             showToast(`مرحباً ${student.name} 👋`);
@@ -4009,13 +4788,11 @@ function renderLoginPage() {
             return;
         }
 
-        // ========== WRONG CREDENTIALS ==========
         showToast('❌ اسم المستخدم أو كلمة المرور غير صحيحة', 'error');
     });
-    
+
     initTheme();
 }
-
         // ==================== JOIN REQUEST MODAL ====================
         function showJoinRequestModal() {
             const modal = document.createElement('div');
@@ -7878,10 +8655,10 @@ function exportHomeworkDetailsToPDF(homeworkId, filter = 'all') {
             `;
             container.innerHTML = html;
         }
-
- function renderStudentDashboard() {
+function renderStudentDashboard() {
     const app = document.getElementById('app');
     const student = currentUser;
+    const isLightMode = document.body.classList.contains('light-mode');
 
     const totalHomeworks = appData.homeworkForms.filter(h => h.classId === student.classId).length;
     const completedHomeworks = appData.homeworkAnswers.filter(a => a.studentId === student.id).length;
@@ -7895,265 +8672,451 @@ function exportHomeworkDetailsToPDF(homeworkId, filter = 'all') {
     const totalMeetings = appData.meetings.filter(m => m.classId === student.classId).length;
     const attendedMeetings = appData.meetingAttendance.filter(a => a.studentId === student.id && a.status === 'attended').length;
     
-    const sortedStudents = [...appData.students].filter(s => s.status === 'active').sort((a, b) => (b.points || 0) - (a.points || 0));
-    const studentRank = sortedStudents.findIndex(s => s.id === student.id) + 1;
+    // ====== ترتيب الطالب داخل فصله فقط ======
+    const classStudents = appData.students.filter(s => s.classId === student.classId && s.status === 'active');
+    const sortedByPoints = [...classStudents].sort((a, b) => (b.points || 0) - (a.points || 0));
+    
+    let studentRank = 1;
+    let currentRank = 1;
+    let prevPoints = null;
+    
+    sortedByPoints.forEach((s, index) => {
+        const points = s.points || 0;
+        if (prevPoints !== null && points < prevPoints) {
+            currentRank = index + 1;
+        }
+        if (s.id === student.id) {
+            studentRank = currentRank;
+        }
+        prevPoints = points;
+    });
+    
+    if (classStudents.length === 0) studentRank = 1;
     
     const answers = appData.homeworkAnswers.filter(a => a.studentId === student.id);
     const avgPercentage = answers.length > 0 
         ? Math.round(answers.reduce((sum, a) => sum + (a.percentage || 0), 0) / answers.length) 
         : 0;
 
+    // ====== ألوان حسب الوضع ======
+    let colors;
+    if (isLightMode) {
+        // ====== الوضع النهاري (Light Mode) - Glassmorphism فاتح ======
+        colors = {
+            bgGradient: 'linear-gradient(135deg, #f5f0ff, #e8e0f5, #f0ecff)',
+            glassBg: 'rgba(255, 255, 255, 0.2)',
+            glassBorder: 'rgba(255, 255, 255, 0.3)',
+            glassShadow: '0 8px 32px rgba(0, 0, 0, 0.06)',
+            textPrimary: '#2D1B4E',
+            textSecondary: 'rgba(45, 27, 78, 0.6)',
+            textMuted: 'rgba(45, 27, 78, 0.4)',
+            accent: '#6C4CE0',
+            accentLight: '#8B6FF5',
+            cardBg: 'rgba(255, 255, 255, 0.25)',
+            sidebarBg: 'linear-gradient(180deg, #ffffff, #f5f0ff)',
+            sidebarBorder: 'rgba(108,76,224,0.1)',
+            footerBg: 'rgba(255,255,255,0.15)',
+            statIconBg: 'rgba(108,76,224,0.12)',
+            hamburgerBg: 'rgba(255,255,255,0.85)',
+            hamburgerColor: '#6C4CE0',
+            badgeBg: 'linear-gradient(135deg, #6C4CE0, #8B6FF5)',
+            badgeText: '#ffffff',
+            rankMeBg: 'rgba(108,76,224,0.08)',
+            rankMeColor: '#6C4CE0',
+            tableHeaderBg: 'rgba(108,76,224,0.06)',
+        };
+    } else {
+        // ====== الوضع الليلي (Dark Mode) - Glassmorphism غامق ======
+        colors = {
+            bgGradient: 'linear-gradient(135deg, #0a0a1a, #1a1040, #0d0825)',
+            glassBg: 'rgba(255, 255, 255, 0.06)',
+            glassBorder: 'rgba(255, 255, 255, 0.08)',
+            glassShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+            textPrimary: '#E8E4F5',
+            textSecondary: 'rgba(232, 228, 245, 0.6)',
+            textMuted: 'rgba(232, 228, 245, 0.35)',
+            accent: '#8B6FF5',
+            accentLight: '#A88BFF',
+            cardBg: 'rgba(255, 255, 255, 0.04)',
+            sidebarBg: 'linear-gradient(180deg, #0d0825, #1a1040)',
+            sidebarBorder: 'rgba(139,111,245,0.1)',
+            footerBg: 'rgba(255,255,255,0.04)',
+            statIconBg: 'rgba(139,111,245,0.15)',
+            hamburgerBg: 'rgba(13,8,37,0.9)',
+            hamburgerColor: '#8B6FF5',
+            badgeBg: 'linear-gradient(135deg, #8B6FF5, #6C4CE0)',
+            badgeText: '#ffffff',
+            rankMeBg: 'rgba(139,111,245,0.12)',
+            rankMeColor: '#8B6FF5',
+            tableHeaderBg: 'rgba(139,111,245,0.08)',
+        };
+    }
+
     app.innerHTML = `
-        <div class="hamburger" id="hamburger" onclick="toggleSidebar()">
-            <span></span><span></span><span></span>
+        <div class="hamburger" id="hamburger" onclick="toggleSidebar()" style="
+            background: ${colors.hamburgerBg};
+            backdrop-filter: blur(12px);
+            border-color: ${colors.accent};
+        ">
+            <span style="background: ${colors.accent};"></span>
+            <span style="background: ${colors.accent};"></span>
+            <span style="background: ${colors.accent};"></span>
         </div>
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
-        <div class="sidebar" id="sidebar">
+        
+        <!-- ===== SIDEBAR ===== -->
+        <div class="sidebar" id="sidebar" style="
+            background: ${colors.sidebarBg};
+            border-left: 2px solid ${colors.sidebarBorder};
+        ">
             <div class="sidebar-header">
-                <img src="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png" alt="The Best Academy" class="sidebar-logo">
-                <h3>${escapeHtml(student.name)}</h3>
-                <p>طالب | ⭐ ${student.points || 0} نقطة</p>
+                <img src="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png" alt="The Best Academy" class="sidebar-logo" style="border-color: ${colors.accent};">
+                <h3 style="color: ${colors.textPrimary};">The Best Academy</h3>
+                <p style="color: ${colors.textSecondary};">👋 مرحباً ${escapeHtml(student.name)}</p>
+                <div style="
+                    background: ${colors.badgeBg};
+                    color: ${colors.badgeText};
+                    padding: 4px 16px;
+                    border-radius: 30px;
+                    font-size: 14px;
+                    font-weight: 700;
+                    display: inline-block;
+                    margin-top: 6px;
+                ">
+                    ⭐ ${student.points || 0} نقطة
+                </div>
             </div>
             <ul class="sidebar-menu">
-                <li class="active" data-page="dashboard"><a onclick="changeStudentPage('dashboard')"><i class="fas fa-chart-line"></i> لوحة التحكم</a></li>
-                <li data-page="homework"><a onclick="changeStudentPage('homework')"><i class="fas fa-file-alt"></i> الواجبات</a></li>
-                <li data-page="exams"><a onclick="changeStudentPage('exams')"><i class="fas fa-pencil-alt"></i> الاختبارات</a></li>
-                <li data-page="meetings"><a onclick="changeStudentPage('meetings')"><i class="fas fa-calendar-alt"></i> الاجتماعات</a></li>
-                <li data-page="results"><a onclick="changeStudentPage('results')"><i class="fas fa-chart-bar"></i> نتائجي</a></li>
-                <li><a onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a></li>
+                <li class="active" data-page="dashboard"><a onclick="changeStudentPage('dashboard')" style="color: ${colors.textPrimary};"><i class="fas fa-chart-line" style="color: ${colors.accent};"></i> لوحة التحكم</a></li>
+                <li data-page="homework"><a onclick="changeStudentPage('homework')" style="color: ${colors.textPrimary};"><i class="fas fa-file-alt" style="color: ${colors.accent};"></i> الواجبات</a></li>
+                <li data-page="exams"><a onclick="changeStudentPage('exams')" style="color: ${colors.textPrimary};"><i class="fas fa-pencil-alt" style="color: ${colors.accent};"></i> الاختبارات</a></li>
+                <li data-page="meetings"><a onclick="changeStudentPage('meetings')" style="color: ${colors.textPrimary};"><i class="fas fa-calendar-alt" style="color: ${colors.accent};"></i> الاجتماعات</a></li>
+                <li data-page="results"><a onclick="changeStudentPage('results')" style="color: ${colors.textPrimary};"><i class="fas fa-chart-bar" style="color: ${colors.accent};"></i> نتائجي</a></li>
+                <li><a onclick="logout()" style="color: #e74c3c !important;"><i class="fas fa-sign-out-alt" style="color: #e74c3c !important;"></i> تسجيل الخروج</a></li>
             </ul>
         </div>
 
-        <!-- ===== HEADER ===== -->
+        <!-- ===== MAIN CONTENT ===== -->
         <div style="
-            background: rgba(10,22,40,0.95);
-            backdrop-filter: blur(10px);
-            padding: 12px 18px;
-            margin: 12px;
-            border-radius: 20px;
-            border: 1px solid rgba(232,185,49,0.12);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            min-height: 100vh;
+            background: ${colors.bgGradient};
+            padding: 10px;
+            padding-top: 5px;
+            transition: background 0.3s ease;
         ">
-            <!-- القسم الأيسر: اللوجو -->
+            <!-- ===== HEADER ===== -->
             <div style="
-                display: flex; 
-                align-items: center; 
-                gap: 12px; 
-                cursor: pointer;
-            " onclick="renderLandingPage()">
-                <img src="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png" 
-                     alt="The Best Academy" 
-                     style="
-                         width: 45px; 
-                         height: 45px; 
-                         border-radius: 50%; 
-                         border: 2.5px solid #e8b931;
-                         object-fit: cover;
-                         box-shadow: 0 0 20px rgba(232,185,49,0.15);
-                     ">
-                <div>
-                    <h1 style="
-                        font-size: 18px; 
-                        color: #e8b931; 
-                        margin: 0; 
-                        line-height: 1.2;
-                        font-weight: 800;
-                    ">
-                        The Best 
-                        <span style="color: #fff;">Academy</span>
-                    </h1>
-                    <p style="
-                        font-size: 11px; 
-                        color: rgba(255,255,255,0.35); 
-                        margin: 0; 
-                        line-height: 1.2;
+                background: ${colors.glassBg};
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                padding: 12px 18px;
+                margin: 10px;
+                border-radius: 24px;
+                border: 1px solid ${colors.glassBorder};
+                box-shadow: ${colors.glassShadow};
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 10px;
+                transition: all 0.3s ease;
+            ">
+                <div style="display: flex; align-items: center; gap: 12px; cursor: pointer;" onclick="renderLandingPage()">
+                    <img src="https://i.ibb.co/SX9y9f5m/Chat-GPT-Image-Aug-31-2026-09-29-15-AM.png" 
+                         alt="The Best Academy" 
+                         style="
+                             width: 45px; 
+                             height: 45px; 
+                             border-radius: 50%; 
+                             border: 2.5px solid ${colors.accent};
+                             object-fit: cover;
+                             box-shadow: 0 0 20px rgba(108,76,224,0.15);
+                         ">
+                    <div>
+                        <h1 style="
+                            font-size: 18px; 
+                            color: ${colors.textPrimary}; 
+                            margin: 0; 
+                            line-height: 1.2;
+                            font-weight: 800;
+                        ">
+                            The Best 
+                            <span style="color: ${colors.accent};">Academy</span>
+                        </h1>
+                        <p style="
+                            font-size: 11px; 
+                            color: ${colors.textSecondary}; 
+                            margin: 0; 
+                            line-height: 1.2;
+                        ">
+                            <i class="fas fa-chalkboard-teacher" style="color: ${colors.accent};"></i>
+                            Ms: Amira Sobhy
+                        </p>
+                    </div>
+                </div>
+
+                <div style="
+                    display: flex; 
+                    gap: 8px; 
+                    align-items: center; 
+                    background: ${colors.cardBg};
+                    backdrop-filter: blur(10px);
+                    padding: 5px 14px 5px 10px; 
+                    border-radius: 50px; 
+                    flex-wrap: wrap;
+                    border: 1px solid ${colors.glassBorder};
+                    transition: all 0.3s ease;
+                ">
+                    <button id="themeToggleBtn" 
+                            onclick="toggleTheme()" 
+                            style="
+                                width: 36px; 
+                                height: 36px; 
+                                border-radius: 50%; 
+                                border: 2px solid ${colors.accent}; 
+                                background: ${isLightMode ? 'rgba(108,76,224,0.08)' : 'rgba(139,111,245,0.12)'};
+                                color: ${colors.accent}; 
+                                cursor: pointer; 
+                                display: flex; 
+                                align-items: center; 
+                                justify-content: center; 
+                                font-size: 15px;
+                                transition: all 0.3s ease;
+                            ">
+                        <i class="fas ${isLightMode ? 'fa-sun' : 'fa-moon'}"></i>
+                    </button>
+
+                    <i class="fas fa-user-graduate" style="color: ${colors.accent}; font-size: 16px;"></i>
+                    <span style="color: ${colors.textPrimary}; font-size: 14px; font-weight: 600;">${escapeHtml(student.name)}</span>
+                    
+                    <span style="
+                        background: ${colors.badgeBg};
+                        color: ${colors.badgeText};
+                        padding: 3px 14px;
+                        border-radius: 30px;
+                        font-size: 13px;
+                        font-weight: 700;
                         display: flex;
                         align-items: center;
                         gap: 4px;
                     ">
-                        <i class="fas fa-chalkboard-teacher" style="color: #e8b931; font-size: 10px;"></i>
-                        Ms: Amira Sobhy
-                    </p>
+                        <i class="fas fa-star" style="font-size: 11px;"></i>
+                        ${student.points || 0}
+                    </span>
+
+                    <button onclick="logout()" 
+                            style="
+                                background: linear-gradient(135deg, #e74c3c, #c0392b); 
+                                color: white; 
+                                border: none; 
+                                padding: 5px 12px; 
+                                border-radius: 30px; 
+                                cursor: pointer; 
+                                font-size: 12px; 
+                                font-weight: 600; 
+                                display: flex; 
+                                align-items: center; 
+                                gap: 5px;
+                                transition: all 0.3s ease;
+                            "
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                        <i class="fas fa-sign-out-alt"></i> خروج
+                    </button>
                 </div>
             </div>
 
-            <!-- القسم الأيمن: معلومات الطالب والأزرار -->
-            <div style="
-                display: flex; 
-                gap: 8px; 
-                align-items: center; 
-                background: rgba(255,255,255,0.04); 
-                padding: 6px 14px 6px 10px; 
-                border-radius: 50px; 
-                flex-wrap: wrap;
-                border: 1px solid rgba(232,185,49,0.06);
-            ">
-                <!-- زر الثيم -->
-                <button id="themeToggleBtn" 
-                        onclick="toggleTheme()" 
-                        style="
-                            width: 36px; 
-                            height: 36px; 
-                            border-radius: 50%; 
-                            border: 2px solid #e8b931; 
-                            background: rgba(255,255,255,0.05); 
-                            color: #e8b931; 
-                            cursor: pointer; 
+            <!-- ===== CONTENT ===== -->
+            <div style="margin:10px;">
+                <div id="studentPageContent">
+                    
+                    <!-- ===== STATS GRID ===== -->
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:12px; margin-bottom:20px;">
+                        ${[
+                            { icon: 'fa-star', color: colors.accent, label: 'نقاطي', value: totalPoints },
+                            { icon: 'fa-trophy', color: '#f39c12', label: 'ترتيبي في الفصل', value: `#${studentRank}` },
+                            { icon: 'fa-check-circle', color: '#2ecc71', label: 'واجبات منجزة', value: completedHomeworks },
+                            { icon: 'fa-clock', color: '#3498db', label: 'واجبات جديدة', value: pendingHomeworks },
+                            { icon: 'fa-chart-line', color: '#9b59b6', label: 'متوسط النتائج', value: `${avgPercentage}%` },
+                            { icon: 'fa-calendar-check', color: '#e74c3c', label: 'الاجتماعات', value: `${attendedMeetings}/${totalMeetings}` }
+                        ].map(stat => `
+                            <div style="
+                                background: ${colors.glassBg};
+                                backdrop-filter: blur(16px);
+                                -webkit-backdrop-filter: blur(16px);
+                                padding: 16px 12px;
+                                border-radius: 18px;
+                                text-align: center;
+                                border: 1px solid ${colors.glassBorder};
+                                box-shadow: ${colors.glassShadow};
+                                transition: all 0.3s ease;
+                                cursor: default;
+                            " onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+                                <div style="
+                                    width: 44px;
+                                    height: 44px;
+                                    background: ${colors.statIconBg};
+                                    border-radius: 50%;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    margin: 0 auto 6px;
+                                ">
+                                    <i class="fas ${stat.icon}" style="color: ${stat.color}; font-size: 20px;"></i>
+                                </div>
+                                <div style="font-size: 24px; font-weight: 800; color: ${colors.textPrimary};">${stat.value}</div>
+                                <div style="font-size: 12px; color: ${colors.textSecondary};">${stat.label}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <!-- ===== PERSONAL INFO ===== -->
+                    <div style="
+                        background: ${colors.glassBg};
+                        backdrop-filter: blur(16px);
+                        -webkit-backdrop-filter: blur(16px);
+                        border-radius: 20px;
+                        padding: 18px 20px;
+                        margin-bottom: 20px;
+                        border: 1px solid ${colors.glassBorder};
+                        box-shadow: ${colors.glassShadow};
+                        transition: all 0.3s ease;
+                    ">
+                        <h3 style="
+                            color: ${colors.textPrimary}; 
+                            margin-bottom: 14px; 
+                            font-size: 17px; 
+                            font-weight: 700; 
                             display: flex; 
                             align-items: center; 
-                            justify-content: center; 
-                            font-size: 15px;
-                            transition: all 0.3s ease;
-                        "
-                        onmouseover="this.style.background='rgba(232,185,49,0.15)'"
-                        onmouseout="this.style.background='rgba(255,255,255,0.05)'">
-                    <i class="fas ${document.body.classList.contains('light-mode') ? 'fa-sun' : 'fa-moon'}"></i>
-                </button>
+                            gap: 10px; 
+                            border-bottom: 2px solid ${isLightMode ? 'rgba(108,76,224,0.08)' : 'rgba(139,111,245,0.12)'}; 
+                            padding-bottom: 10px;
+                        ">
+                            <i class="fas fa-id-card" style="color: ${colors.accent};"></i> معلوماتي الشخصية
+                        </h3>
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:12px;">
+                            ${[
+                                { label: 'الاسم الكامل', value: student.name },
+                                { label: 'الفصل', value: student.className || '-' },
+                                { label: 'اسم المستخدم', value: student.username },
+                                { label: '⭐ النقاط', value: `${student.points || 0} نقطة`, isAccent: true }
+                            ].map(info => `
+                                <div style="
+                                    background: ${colors.cardBg};
+                                    backdrop-filter: blur(8px);
+                                    padding: 10px 14px;
+                                    border-radius: 12px;
+                                    border: 1px solid ${colors.glassBorder};
+                                ">
+                                    <div style="font-size: 10px; color: ${colors.textSecondary};">${info.label}</div>
+                                    <div style="font-size: 15px; font-weight: ${info.isAccent ? '700' : '600'}; color: ${info.isAccent ? colors.accent : colors.textPrimary};">${info.value}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
 
-                <!-- أيقونة الطالب -->
-                <i class="fas fa-user-graduate" style="color: #e8b931; font-size: 16px;"></i>
-                
-                <!-- اسم الطالب -->
-                <span style="
-                    color: rgba(255,255,255,0.85); 
-                    font-size: 15px; 
-                    font-weight: 600;
-                ">${escapeHtml(student.name)}</span>
-
-                <!-- نقاط الطالب -->
-                <span style="
-                    background: #e8b931; 
-                    color: #0a1628; 
-                    padding: 3px 12px; 
-                    border-radius: 30px; 
-                    font-size: 13px; 
-                    font-weight: 700;
-                    display: flex;
-                    align-items: center;
-                    gap: 4px;
-                ">
-                    <i class="fas fa-star" style="font-size: 11px;"></i>
-                    ${student.points || 0}
-                </span>
-
-                <!-- زر الخروج -->
-                <button onclick="logout()" 
-                        style="
-                            background: linear-gradient(135deg, #c0392b, #e74c3c); 
-                            color: white; 
-                            border: none; 
-                            padding: 6px 14px; 
-                            border-radius: 30px; 
-                            cursor: pointer; 
-                            font-size: 12px; 
-                            font-weight: 600; 
+                    <!-- ===== RANKING ===== -->
+                    <div style="
+                        background: ${colors.glassBg};
+                        backdrop-filter: blur(16px);
+                        -webkit-backdrop-filter: blur(16px);
+                        border-radius: 20px;
+                        padding: 18px 20px;
+                        margin-bottom: 20px;
+                        border: 1px solid ${colors.glassBorder};
+                        box-shadow: ${colors.glassShadow};
+                        transition: all 0.3s ease;
+                    ">
+                        <h3 style="
+                            color: ${colors.textPrimary}; 
+                            margin-bottom: 14px; 
+                            font-size: 17px; 
+                            font-weight: 700; 
                             display: flex; 
                             align-items: center; 
-                            gap: 5px;
-                            transition: all 0.3s ease;
-                        "
-                        onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 15px rgba(231,76,60,0.3)'"
-                        onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">
-                    <i class="fas fa-sign-out-alt"></i> خروج
-                </button>
+                            gap: 10px; 
+                            border-bottom: 2px solid ${isLightMode ? 'rgba(108,76,224,0.08)' : 'rgba(139,111,245,0.12)'}; 
+                            padding-bottom: 10px;
+                        ">
+                            <i class="fas fa-trophy" style="color: ${colors.accent};"></i> ترتيبي في الفصل
+                        </h3>
+                        <div id="studentRankingContainer"></div>
+                    </div>
+
+                    <!-- ===== RECENT HOMEWORKS ===== -->
+                    <div style="
+                        background: ${colors.glassBg};
+                        backdrop-filter: blur(16px);
+                        -webkit-backdrop-filter: blur(16px);
+                        border-radius: 20px;
+                        padding: 18px 20px;
+                        margin-bottom: 20px;
+                        border: 1px solid ${colors.glassBorder};
+                        box-shadow: ${colors.glassShadow};
+                        transition: all 0.3s ease;
+                    ">
+                        <h3 style="
+                            color: ${colors.textPrimary}; 
+                            margin-bottom: 14px; 
+                            font-size: 17px; 
+                            font-weight: 700; 
+                            display: flex; 
+                            align-items: center; 
+                            gap: 10px; 
+                            border-bottom: 2px solid ${isLightMode ? 'rgba(108,76,224,0.08)' : 'rgba(139,111,245,0.12)'}; 
+                            padding-bottom: 10px;
+                        ">
+                            <i class="fas fa-clock" style="color: ${colors.accent};"></i> أحدث الواجبات
+                        </h3>
+                        <div id="studentRecentHomeworks"></div>
+                    </div>
+
+                    <!-- ===== UPCOMING MEETINGS ===== -->
+                    <div style="
+                        background: ${colors.glassBg};
+                        backdrop-filter: blur(16px);
+                        -webkit-backdrop-filter: blur(16px);
+                        border-radius: 20px;
+                        padding: 18px 20px;
+                        margin-bottom: 20px;
+                        border: 1px solid ${colors.glassBorder};
+                        box-shadow: ${colors.glassShadow};
+                        transition: all 0.3s ease;
+                    ">
+                        <h3 style="
+                            color: ${colors.textPrimary}; 
+                            margin-bottom: 14px; 
+                            font-size: 17px; 
+                            font-weight: 700; 
+                            display: flex; 
+                            align-items: center; 
+                            gap: 10px; 
+                            border-bottom: 2px solid ${isLightMode ? 'rgba(108,76,224,0.08)' : 'rgba(139,111,245,0.12)'}; 
+                            padding-bottom: 10px;
+                        ">
+                            <i class="fas fa-calendar-alt" style="color: ${colors.accent};"></i> الاجتماعات القادمة
+                        </h3>
+                        <div id="studentUpcomingMeetings"></div>
+                    </div>
+
+                </div>
             </div>
         </div>
 
-        <!-- ===== MAIN CONTENT ===== -->
-        <div style="margin:10px; padding:10px; min-height:calc(100vh - 140px);">
-            <div id="studentPageContent">
-                <!-- Stats Grid -->
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:20px;">
-                    <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:14px; text-align:center; border:1px solid rgba(232,185,49,0.06);">
-                        <div style="font-size:22px; margin-bottom:3px;">⭐</div>
-                        <div style="font-size:22px; font-weight:bold; color:#e8b931;">${totalPoints}</div>
-                        <div style="font-size:11px; color:rgba(255,255,255,0.3);">نقاطي</div>
-                    </div>
-                    <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:14px; text-align:center; border:1px solid rgba(52,152,219,0.06);">
-                        <div style="font-size:22px; margin-bottom:3px;">🏆</div>
-                        <div style="font-size:22px; font-weight:bold; color:#3498db;">#${studentRank}</div>
-                        <div style="font-size:11px; color:rgba(255,255,255,0.3);">ترتيبي</div>
-                    </div>
-                    <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:14px; text-align:center; border:1px solid rgba(46,204,113,0.06);">
-                        <div style="font-size:22px; margin-bottom:3px;">✅</div>
-                        <div style="font-size:22px; font-weight:bold; color:#2ecc71;">${completedHomeworks}</div>
-                        <div style="font-size:11px; color:rgba(255,255,255,0.3);">واجبات منجزة</div>
-                    </div>
-                    <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:14px; text-align:center; border:1px solid rgba(243,156,18,0.06);">
-                        <div style="font-size:22px; margin-bottom:3px;">⏳</div>
-                        <div style="font-size:22px; font-weight:bold; color:#f39c12;">${pendingHomeworks}</div>
-                        <div style="font-size:11px; color:rgba(255,255,255,0.3);">واجبات جديدة</div>
-                    </div>
-                    <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:14px; text-align:center; border:1px solid rgba(155,89,182,0.06);">
-                        <div style="font-size:22px; margin-bottom:3px;">📊</div>
-                        <div style="font-size:22px; font-weight:bold; color:#9b59b6;">${avgPercentage}%</div>
-                        <div style="font-size:11px; color:rgba(255,255,255,0.3);">متوسط النتائج</div>
-                    </div>
-                    <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:14px; text-align:center; border:1px solid rgba(231,76,60,0.06);">
-                        <div style="font-size:22px; margin-bottom:3px;">📅</div>
-                        <div style="font-size:22px; font-weight:bold; color:#e74c3c;">${attendedMeetings}/${totalMeetings}</div>
-                        <div style="font-size:11px; color:rgba(255,255,255,0.3);">الاجتماعات</div>
-                    </div>
-                </div>
-
-                <!-- Personal Info -->
-                <div style="background:rgba(255,255,255,0.02); border-radius:16px; padding:16px; margin-bottom:20px; border:1px solid rgba(232,185,49,0.06);">
-                    <h3 style="color:#e8b931; margin-bottom:14px; font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px; border-bottom:2px solid rgba(232,185,49,0.06); padding-bottom:10px;">
-                        <i class="fas fa-id-card"></i> معلوماتي الشخصية
-                    </h3>
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:10px;">
-                        <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.04);">
-                            <div style="font-size:10px; color:rgba(255,255,255,0.25);">الاسم الكامل</div>
-                            <div style="font-size:14px; font-weight:600; color:rgba(255,255,255,0.85);">${escapeHtml(student.name)}</div>
-                        </div>
-                        <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.04);">
-                            <div style="font-size:10px; color:rgba(255,255,255,0.25);">الفصل</div>
-                            <div style="font-size:14px; font-weight:600; color:rgba(255,255,255,0.85);">${student.className || '-'}</div>
-                        </div>
-                        <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.04);">
-                            <div style="font-size:10px; color:rgba(255,255,255,0.25);">اسم المستخدم</div>
-                            <div style="font-size:14px; font-weight:600; color:rgba(255,255,255,0.85);">${student.username}</div>
-                        </div>
-                        <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.04);">
-                            <div style="font-size:10px; color:rgba(255,255,255,0.25);">⭐ النقاط</div>
-                            <div style="font-size:14px; font-weight:600; color:#e8b931;">${student.points || 0} نقطة</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Ranking -->
-                <div style="background:rgba(255,255,255,0.02); border-radius:16px; padding:16px; margin-bottom:20px; border:1px solid rgba(232,185,49,0.06);">
-                    <h3 style="color:#e8b931; margin-bottom:14px; font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px; border-bottom:2px solid rgba(232,185,49,0.06); padding-bottom:10px;">
-                        <i class="fas fa-trophy"></i> ترتيبي بين الطلاب
-                    </h3>
-                    <div id="studentRankingContainer"></div>
-                </div>
-
-                <!-- Recent Homeworks -->
-                <div style="background:rgba(255,255,255,0.02); border-radius:16px; padding:16px; margin-bottom:20px; border:1px solid rgba(232,185,49,0.06);">
-                    <h3 style="color:#e8b931; margin-bottom:14px; font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px; border-bottom:2px solid rgba(232,185,49,0.06); padding-bottom:10px;">
-                        <i class="fas fa-clock"></i> أحدث الواجبات
-                    </h3>
-                    <div id="studentRecentHomeworks"></div>
-                </div>
-
-                <!-- Upcoming Meetings -->
-                <div style="background:rgba(255,255,255,0.02); border-radius:16px; padding:16px; margin-bottom:20px; border:1px solid rgba(232,185,49,0.06);">
-                    <h3 style="color:#e8b931; margin-bottom:14px; font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px; border-bottom:2px solid rgba(232,185,49,0.06); padding-bottom:10px;">
-                        <i class="fas fa-calendar-alt"></i> الاجتماعات القادمة
-                    </h3>
-                    <div id="studentUpcomingMeetings"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer" style="background:rgba(10,22,40,0.95); color:rgba(255,255,255,0.2); padding:12px; text-align:center; margin-top:20px; border-top:1px solid rgba(232,185,49,0.04); font-size:12px;">
-            <p>© 2025 <span style="color:#e8b931;">The Best Academy</span> | Ms: Amira Sobhy</p>
+        <!-- ===== FOOTER ===== -->
+        <div style="
+            background: ${colors.footerBg};
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            color: ${colors.textSecondary};
+            padding: 12px;
+            text-align: center;
+            border-top: 1px solid ${colors.glassBorder};
+            font-size: 12px;
+            transition: all 0.3s ease;
+        ">
+            <p>© 2025 <span style="color: ${colors.accent}; font-weight: 600;">The Best Academy</span> | Ms: Amira Sobhy</p>
         </div>
     `;
 
@@ -8263,106 +9226,142 @@ function renderStudentClassRanking() {
     const student = currentUser;
     if (!student) return;
 
-    // جلب طلاب نفس الفصل
+    const isLightMode = document.body.classList.contains('light-mode');
+
+    // ====== جلب طلاب نفس الفصل فقط ======
     const classStudents = appData.students.filter(s => s.classId === student.classId && s.status === 'active');
     
     if (classStudents.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:rgba(255,255,255,0.3); padding:20px;">لا يوجد طلاب في فصلنا</p>';
+        container.innerHTML = `<p style="text-align:center; color:${isLightMode ? 'rgba(45,27,78,0.3)' : 'rgba(232,228,245,0.3)'}; padding:20px;">لا يوجد طلاب في فصلنا</p>`;
         return;
     }
 
-    // ترتيب حسب النقاط (تنازلي)
+    // ====== ترتيب حسب النقاط (تنازلي) ======
     const sorted = [...classStudents].sort((a, b) => (b.points || 0) - (a.points || 0));
-    const myRank = sorted.findIndex(s => s.id === student.id) + 1;
+    
+    // ====== حساب الترتيب مع مراعاة التساوي ======
+    let rankings = [];
+    let currentRank = 1;
+    let prevPoints = null;
+    
+    sorted.forEach((s, index) => {
+        const points = s.points || 0;
+        if (prevPoints !== null && points < prevPoints) {
+            currentRank = index + 1;
+        }
+        rankings.push({
+            student: s,
+            rank: currentRank,
+            isMe: s.id === student.id
+        });
+        prevPoints = points;
+    });
 
-    // حساب إحصائيات
+    // ====== إحصائيات الفصل ======
     const totalPoints = sorted.reduce((sum, s) => sum + (s.points || 0), 0);
-    const avgPoints = Math.round(totalPoints / sorted.length);
+    const avgPoints = sorted.length > 0 ? Math.round(totalPoints / sorted.length) : 0;
     const topStudent = sorted[0];
+    const myRank = rankings.find(r => r.isMe)?.rank || 1;
+
+    // ====== ألوان حسب الوضع ======
+    const accentColor = isLightMode ? '#6C4CE0' : '#8B6FF5';
+    const textColor = isLightMode ? '#2D1B4E' : '#E8E4F5';
+    const textLight = isLightMode ? 'rgba(45, 27, 78, 0.5)' : 'rgba(232, 228, 245, 0.4)';
+    const glassBg = isLightMode ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.04)';
+    const glassBorder = isLightMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.06)';
+    const rankMeBg = isLightMode ? 'rgba(108,76,224,0.08)' : 'rgba(139,111,245,0.12)';
 
     let html = `
         <!-- إحصائيات الفصل -->
         <div style="
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             gap: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 16px;
         ">
             <div style="
-                background: rgba(108,76,224,0.06);
+                background: ${glassBg};
+                backdrop-filter: blur(8px);
                 border-radius: 12px;
                 padding: 10px;
                 text-align: center;
-                border: 1px solid rgba(108,76,224,0.08);
+                border: 1px solid ${glassBorder};
             ">
-                <div style="font-size: 20px; font-weight: bold; color: #6C4CE0;">${sorted.length}</div>
-                <div style="font-size: 11px; color: rgba(255,255,255,0.3);">👨‍🎓 عدد الطلاب</div>
+                <div style="font-size: 20px; font-weight: 800; color: ${accentColor};">${sorted.length}</div>
+                <div style="font-size: 11px; color: ${textLight};">👨‍🎓 عدد الطلاب</div>
             </div>
             <div style="
-                background: rgba(108,76,224,0.06);
+                background: ${glassBg};
+                backdrop-filter: blur(8px);
                 border-radius: 12px;
                 padding: 10px;
                 text-align: center;
-                border: 1px solid rgba(108,76,224,0.08);
+                border: 1px solid ${glassBorder};
             ">
-                <div style="font-size: 20px; font-weight: bold; color: #FFD700;">#${myRank}</div>
-                <div style="font-size: 11px; color: rgba(255,255,255,0.3);">🏆 ترتيبك</div>
+                <div style="font-size: 20px; font-weight: 800; color: #f39c12;">#${myRank}</div>
+                <div style="font-size: 11px; color: ${textLight};">🏆 ترتيبك</div>
             </div>
             <div style="
-                background: rgba(108,76,224,0.06);
+                background: ${glassBg};
+                backdrop-filter: blur(8px);
                 border-radius: 12px;
                 padding: 10px;
                 text-align: center;
-                border: 1px solid rgba(108,76,224,0.08);
+                border: 1px solid ${glassBorder};
             ">
-                <div style="font-size: 20px; font-weight: bold; color: #6C4CE0;">${avgPoints}</div>
-                <div style="font-size: 11px; color: rgba(255,255,255,0.3);">📊 متوسط النقاط</div>
+                <div style="font-size: 20px; font-weight: 800; color: ${accentColor};">${avgPoints}</div>
+                <div style="font-size: 11px; color: ${textLight};">📊 متوسط النقاط</div>
             </div>
             <div style="
-                background: rgba(108,76,224,0.06);
+                background: ${glassBg};
+                backdrop-filter: blur(8px);
                 border-radius: 12px;
                 padding: 10px;
                 text-align: center;
-                border: 1px solid rgba(108,76,224,0.08);
+                border: 1px solid ${glassBorder};
             ">
-                <div style="font-size: 16px; font-weight: bold; color: #FFD700;">${topStudent?.name || '-'}</div>
-                <div style="font-size: 11px; color: rgba(255,255,255,0.3);">🥇 الأعلى نقاطاً</div>
+                <div style="font-size: 14px; font-weight: 700; color: #f39c12;">${topStudent?.name || '-'}</div>
+                <div style="font-size: 11px; color: ${textLight};">🥇 الأعلى نقاطاً</div>
             </div>
         </div>
 
-        <!-- جدول الترتيب الكامل -->
+        <!-- جدول الترتيب -->
         <div style="
-            background: rgba(255,255,255,0.02);
+            background: ${glassBg};
+            backdrop-filter: blur(8px);
             border-radius: 12px;
             overflow: hidden;
-            border: 1px solid rgba(108,76,224,0.06);
+            border: 1px solid ${glassBorder};
         ">
             <table style="width:100%; border-collapse:collapse; font-size:13px;">
                 <thead>
-                    <tr style="background: rgba(108,76,224,0.06);">
-                        <th style="padding:8px 10px; text-align:right; border-bottom:2px solid rgba(108,76,224,0.1); color:rgba(255,255,255,0.4); font-weight:600; font-size:12px;">#</th>
-                        <th style="padding:8px 10px; text-align:right; border-bottom:2px solid rgba(108,76,224,0.1); color:rgba(255,255,255,0.4); font-weight:600; font-size:12px;">اسم الطالب</th>
-                        <th style="padding:8px 10px; text-align:center; border-bottom:2px solid rgba(108,76,224,0.1); color:rgba(255,255,255,0.4); font-weight:600; font-size:12px;">⭐ النقاط</th>
+                    <tr style="background: ${isLightMode ? 'rgba(108,76,224,0.06)' : 'rgba(139,111,245,0.08)'};">
+                        <th style="padding:8px 10px; text-align:right; color: ${textLight}; font-weight:600; font-size:12px;">#</th>
+                        <th style="padding:8px 10px; text-align:right; color: ${textLight}; font-weight:600; font-size:12px;">اسم الطالب</th>
+                        <th style="padding:8px 10px; text-align:center; color: ${textLight}; font-weight:600; font-size:12px;">⭐ النقاط</th>
                     </tr>
                 </thead>
                 <tbody>
     `;
 
-    sorted.forEach((s, idx) => {
-        const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}`;
-        const isMe = s.id === student.id;
+    rankings.forEach((item) => {
+        const s = item.student;
+        const rank = item.rank;
+        const isMe = item.isMe;
+        
+        const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}`;
+        
         html += `
             <tr style="
-                ${isMe ? 'background: rgba(108,76,224,0.08);' : ''} 
-                border-bottom: 1px solid rgba(255,255,255,0.02);
-                transition: all 0.2s ease;
+                ${isMe ? `background: ${rankMeBg};` : ''} 
+                border-bottom: 1px solid ${isLightMode ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.02)'};
             ">
-                <td style="padding:6px 10px; color:${isMe ? '#6C4CE0' : 'rgba(255,255,255,0.3)'}; font-weight:${isMe ? '700' : '400'}; font-size:13px;">
+                <td style="padding:6px 10px; color:${isMe ? accentColor : textLight}; font-weight:${isMe ? '700' : '400'}; font-size:13px;">
                     ${medal}
                 </td>
                 <td style="
                     padding:6px 10px; 
-                    color: ${isMe ? '#6C4CE0' : 'rgba(255,255,255,0.8)'}; 
+                    color: ${isMe ? accentColor : textColor}; 
                     font-weight: ${isMe ? '700' : '400'};
                 ">
                     ${s.name} ${isMe ? '👈 أنت' : ''}
@@ -8370,7 +9369,7 @@ function renderStudentClassRanking() {
                 <td style="
                     padding:6px 10px; 
                     text-align:center; 
-                    color: ${isMe ? '#6C4CE0' : '#6C4CE0'}; 
+                    color: ${isMe ? accentColor : accentColor}; 
                     font-weight: ${isMe ? '800' : '600'}; 
                     font-size: ${isMe ? '18px' : '15px'};
                 ">
@@ -8818,11 +9817,15 @@ function renderStudentUpcomingMeetings() {
             }
         }
 
-       function initTheme() {
+ function initTheme() {
     const savedTheme = localStorage.getItem('theme');
     const body = document.body;
     
-    if (savedTheme === 'light') {
+    // لو مفيش ثيم محفوظ، اجعل الوضع الليلي
+    if (!savedTheme) {
+        body.classList.remove('light-mode');
+        localStorage.setItem('theme', 'dark');
+    } else if (savedTheme === 'light') {
         body.classList.add('light-mode');
     } else {
         body.classList.remove('light-mode');
@@ -8830,9 +9833,6 @@ function renderStudentUpcomingMeetings() {
     
     // تطبيق الألوان
     updateThemeColors();
-    
-    // تطبيق الزوم
-    document.body.style.zoom = '0.9';
     
     // تحديث شكل زر الثيم
     const themeBtn = document.getElementById('themeToggleBtn');
@@ -9096,6 +10096,21 @@ function openWhatsApp(studentId) {
 async function startApp() {
     await loadAllDataFromFirebase();
     addThemeStyles();
+    
+    // ====== تعيين الوضع الافتراضي ======
+    const savedTheme = localStorage.getItem('theme');
+    const body = document.body;
+    
+    // لو مفيش ثيم محفوظ، نضع الوضع الليلي كافتراضي
+    if (!savedTheme) {
+        body.classList.remove('light-mode');
+        localStorage.setItem('theme', 'dark');
+    } else if (savedTheme === 'light') {
+        body.classList.add('light-mode');
+    } else {
+        body.classList.remove('light-mode');
+    }
+    
     initTheme();
     renderLandingPage();
     console.log('✅ The Best Academy started!');
